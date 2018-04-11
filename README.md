@@ -1,2 +1,2 @@
-# smoke simulation using semi-langrangian advection # 
+# smoke simulation using semi-lagrangian advection # 
 - added vorticity confinement
