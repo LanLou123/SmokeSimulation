@@ -89,6 +89,7 @@ MACGrid::~MACGrid()
 
 void MACGrid::reset()
 {
+    cout<<"once"<<endl;
    mU.initialize();
    mV.initialize();
    mW.initialize();
@@ -116,12 +117,14 @@ void MACGrid::reset()
     diverGence.initialize(0.0);
 
     calculateAMatrix();
-   calculatePreconditioner(AMatrix);
+    calculatePreconditioner(AMatrix);
+    int l=0;
 }
 
 void MACGrid::initialize()
 {
    reset();
+
 }
 
 void MACGrid::updateSources()
@@ -129,22 +132,30 @@ void MACGrid::updateSources()
     // Set initial values for density, temperature, velocity
 
 
-    for(int i=3; i<6;i++){
-        for(int j=0; j<4; j++){
+//    FOR_EACH_FACE
+//            {
+//                mU(i,j,k)=1e-3;
+//                mV(i,j,k)=1e-3;
+//                mW(i,j,k)=1e-3;
+//            };
+    for(int i=10; i<12;i++){
+        for(int j=0; j<5; j++){
             mV(i,j,0) = 30.0;
+            mU(i,j,0) = 0.0;
             mD(i,j,0) = 1.0;
             mT(i,j,0) = 1.0;
 
-            mV(i,j+1,0) = 30.0;
-            mD(i,j,0) = 1.0;
-            mT(i,j,0) = 1.0;
+            mV(i,j+1,0) =30.0;
+            mU(i,j+1,0) = 0.0;
+            mD(i,j+1,0) = 1.0;
+            mT(i,j+1,0) = 1.0;
         }
     }
 
 
 	// Refresh particles in source.
-	for(int i=5; i<6; i++) {
-		for (int j = 1; j < 3; j++) {
+	for(int i=10; i<12; i++) {
+		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k <= 0; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
@@ -172,15 +183,18 @@ void MACGrid::advectVelocity(double dt)
                 vec3 currentptfx=vec3(i*theCellSize,j*theCellSize+0.5,k*theCellSize+0.5);
                 vec3 currentptfy=vec3(i*theCellSize+0.5,j*theCellSize,k*theCellSize+0.5);
                 vec3 currentptfz=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize);
-                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
-                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
-                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
-//                vec3 cur_vel_x=vec3(getVelocityX(currentptfx),0,0);
-//                vec3 cur_vel_y=vec3(0,getVelocityY(currentptfy),0);
-//                vec3 cur_vel_z=vec3(0,0,getVelocityZ(currentptfz));
-                vec3 old_pt_x=currentptfx-cur_vel_x*dt;
-                vec3 old_pt_y=currentptfy-cur_vel_y*dt;
-                vec3 old_pt_z=currentptfz-cur_vel_z*dt;
+//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
+//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
+//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
+                vec3 cur_vel_x=vec3(getVelocityX(currentptfx),0,0);
+                vec3 cur_vel_y=vec3(0,getVelocityY(currentptfy),0);
+                vec3 cur_vel_z=vec3(0,0,getVelocityZ(currentptfz));
+                vec3 mid_pt_x=currentptfx-cur_vel_x*dt/2;
+                vec3 mid_pt_y=currentptfy-cur_vel_y*dt/2;
+                vec3 mid_pt_z=currentptfz-cur_vel_z*dt/2;
+                vec3 old_pt_x=currentptfx-vec3(getVelocityX(mid_pt_x),0,0)*dt;
+                vec3 old_pt_y=currentptfy-vec3(0,getVelocityY(mid_pt_y),0)*dt;
+                vec3 old_pt_z=currentptfz-vec3(0,0,getVelocityZ(mid_pt_z))*dt;
                 double newvel_x=getVelocityX(old_pt_x);
                 double newvel_y=getVelocityY(old_pt_y);
                 double newvel_z=getVelocityZ(old_pt_z);
@@ -188,7 +202,7 @@ void MACGrid::advectVelocity(double dt)
                 mV(i,j,k)=newvel_y;
                 mW(i,j,k)=newvel_z;
 //                if(mV(i,j,k)>1)
-                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
             };
     // TODO: Get rid of these three lines after you implement yours
 
@@ -213,15 +227,28 @@ void MACGrid::advectTemperature(double dt)
     // TODO: Calculate new temp and store in target
 
     // TODO: Get rid of this line after you implement yours
-    target.mT = mT;
 
+    FOR_EACH_CELL
+            {
+                vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
+//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
+//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
+//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
+                vec3 cur_vel=getVelocity(currentptc);
+                vec3 mid_pt=currentptc-cur_vel*dt/2;
+                vec3 old_pt=currentptc-getVelocity(mid_pt);
+                double new_temp=getTemperature(old_pt);
+                mT(i,j,k)=new_temp;
+//                if(mV(i,j,k)>1)
+//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+            };
     // TODO: Your code is here. It builds target.mT for all cells.
     //
     //
     //
 
     // Then save the result to our object
-    mT = target.mT;
+    target.mT = mT;
 }
 
 
@@ -231,9 +258,8 @@ void MACGrid::advectRenderingParticles(double dt) {
 	for (size_t p = 0; p < rendering_particles.size(); p++) {
 		vec3 currentPosition = rendering_particles[p];
         vec3 currentVelocity = getVelocity(currentPosition);
-
         vec3 nextPosition = currentPosition + currentVelocity * dt;
-        std::cout<<nextPosition-currentPosition<<std::endl;
+//        std::cout<<nextPosition-currentPosition<<std::endl;
         vec3 clippedNextPosition = clipToGrid(nextPosition, currentPosition);
         // Keep going...
         vec3 nexv=getVelocity(nextPosition);
@@ -241,10 +267,10 @@ void MACGrid::advectRenderingParticles(double dt) {
         vec3 averageVelocity = (currentVelocity + nextVelocity) / 2.0;
         vec3 betterNextPosition = currentPosition + averageVelocity * dt;
         vec3 clippedBetterNextPosition = clipToGrid(betterNextPosition, currentPosition);
-//        rendering_particles[p] = clippedBetterNextPosition;
-//		rendering_particles_vel[p] = averageVelocity;
-        rendering_particles_vel[p]=nexv;
-        rendering_particles[p]=nextPosition;
+        rendering_particles[p] = clippedBetterNextPosition;
+		rendering_particles_vel[p] = averageVelocity;
+//        rendering_particles_vel[p]=nexv;
+//        rendering_particles[p]=nextPosition;
 	}
 }
 
@@ -253,15 +279,29 @@ void MACGrid::advectDensity(double dt)
     // TODO: Calculate new densitities and store in target
 
     // TODO: Get rid of this line after you implement yours
-    target.mD = mD;
 
+    FOR_EACH_CELL
+            {
+                vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
+//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
+//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
+//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
+                double cur_density=getDensity(currentptc);
+                vec3 cur_vel=getVelocity(currentptc);
+                vec3 mid_pt=currentptc-cur_vel*dt/2;
+                vec3 old_pt=currentptc-getVelocity(mid_pt);
+                double new_density=getDensity(old_pt);
+                mD(i,j,k)=new_density;
+//                if(mV(i,j,k)>1)
+//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+            };
     // TODO: Your code is here. It builds target.mD for all cells.
     //
     //
     //
 
     // Then save the result to our object
-    mD = target.mD;
+    target.mD = mD;
 }
 
 void MACGrid::computeBouyancy(double dt)
@@ -270,7 +310,14 @@ void MACGrid::computeBouyancy(double dt)
 
     // TODO: Get rid of this line after you implement yours
     target.mV = mV;
-
+    double a = 3.0, b = 3.0;
+    FOR_EACH_CELL
+            {
+                double s = (mD(i,j,k) + mD(i,j-1,k))/2; // CHANGED! Original: double s = (mD(i,j,k) + mD(i,j-1,k))/2;
+                double T = (mT(i,j,k)+mT(i,j-1,k))/2;
+                double fbuoy = -a*s+b*T;
+                target.mV(i,j,k) += dt*fbuoy;
+            };
     // TODO: Your code is here. It modifies target.mV for all y face velocities.
     //
     //
@@ -283,6 +330,9 @@ void MACGrid::computeBouyancy(double dt)
 void MACGrid::computeCentralVel() {
     FOR_EACH_CELL
             {
+//                centeral_vel_x(i,j,k)=(getVelocityX(vec3(i,j,k))+getVelocityX(vec3(i+1,j,k)))/2;
+//                centeral_vel_y(i,j,k)=(getVelocityY(vec3(i,j,k))+getVelocityY(vec3(i,j+1,k)))/2;
+//                centeral_vel_z(i,j,k)=(getVelocityZ(vec3(i,j,k))+getVelocityZ(vec3(i,j,k+1)))/2;
                 centeral_vel_x(i,j,k)=(mU(i,j,k)+mU(i+1,j,k))/2;
                 centeral_vel_y(i,j,k)=(mV(i,j,k)+mV(i,j+1,k))/2;
                 centeral_vel_z(i,j,k)=(mW(i,j,k)+mW(i,j,k+1))/2;
@@ -348,7 +398,7 @@ void MACGrid::computeVorticityConfinement(double dt)
 
    // Then save the result to our object
    target.mU= mU ;
-   target.mV=mV  ;
+   target.mV=mV ;
     target.mW=mW ;
 //    FOR_EACH_FACE
 //            {
@@ -375,11 +425,13 @@ void MACGrid::computeDivergence()
 void MACGrid::project(double dt)
 {
     int size=theDim[MACGrid::X]*theDim[MACGrid::Y]*theDim[MACGrid::Z];
-    MatrixXd A(size,size);
+    SparseMatrix<double> A(size,size);
     A.setZero();
     VectorXd b(size);
     VectorXd p;
     computeDivergence();
+//    GridData d;
+//    d.initialize();
     FOR_EACH_CELL
             {
                 int curidx= getCellIndex(i,j,k);
@@ -388,42 +440,62 @@ void MACGrid::project(double dt)
                 if(isValidCell(i+1,j,k))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i+1,j,k))=-1;
+                    A.insert(curidx,getCellIndex(i+1,j,k))=-1;
                 }
                 if(isValidCell(i-1,j,k))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i-1,j,k))=-1;
+                    A.insert(curidx,getCellIndex(i-1,j,k))=-1;
                 }
                 if(isValidCell(i,j+1,k))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i,j+1,k))=-1;
+                    A.insert(curidx,getCellIndex(i,j+1,k))=-1;
                 }
                 if(isValidCell(i,j-1,k))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i,j-1,k))=-1;
+                    A.insert(curidx,getCellIndex(i,j-1,k))=-1;
                 }
                 if(isValidCell(i,j,k+1))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i,j,k+1))=-1;
+                    A.insert(curidx,getCellIndex(i,j,k+1))=-1;
                 }
                 if(isValidCell(i,j,k-1))
                 {
                     numCells++;
-                    A(curidx,getCellIndex(i,j,k-1))=-1;
+                    A.insert(curidx,getCellIndex(i,j,k-1))=-1;
 
                 }
+//                d(i,j,k)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
                 b(curidx)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
-                A(curidx,curidx)=numCells;
+//                cout<<b(curidx)<<endl;
+                A.insert(curidx,curidx)=numCells;
 
             };
+//    Eigen::initParallel();
+//    Eigen::setNbThreads(5);
+//    omp_set_num_threads(5);
+//    OMP_NUM_THREADS=n ./my_program
+//    omp_set_num_threads(5);
+//    typedef ConjugateGradient<SparseMatrix<double>,Lower, IncompleteCholesky<double>> ICCG;
 
-
-    VectorXd x=A.jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
-    p=x;
+    LeastSquaresConjugateGradient<SparseMatrix<double> > lscg;
+//    ICCG cg;
+//    cg.setTolerance(0.001);
+//    cg.setMaxIterations(500);
+    lscg.compute(A);
+    VectorXd x = lscg.solve(b);
+//    lscg.setMaxIterations(500);
+    x=lscg.solve(b);
+    std::cout << "#iterations:     " << lscg.iterations() << std::endl;
+    std::cout << "estimated error: " << lscg.error()      << std::endl;
+    std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
+//    p=x;
+//    cout<<A<<endl;
+//    cout<<b<<endl;
+//    cout<<x<<endl;
 //    for(int i=0;i<180;i++)
 //    {
 //        for(int j=0;j<180;j++) {
@@ -431,6 +503,11 @@ void MACGrid::project(double dt)
 //        }
 //        std::cout<<std::endl;
 //    }
+//    FOR_EACH_CELL
+//            {
+//                std::cout<<d(i,j,k)<<endl;
+//            };
+//    preconditionedConjugateGradient(AMatrix,mP,d,1000,1e-3);
 
 
     for(int idx=0;idx<p.size();idx++)
@@ -791,7 +868,9 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 	}
 	*/
 
-	GridData s = z; // Search vector;
+	GridData s;
+    s.initialize();
+    s = z; // Search vector;
 
 	double sigma = dotProduct(z, r);
 
@@ -812,7 +891,9 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 		multiply(alpha, z, alphaTimesZ);
 		subtract(r, alphaTimesZ, r);
 		//r -= alpha * z;
-
+        FOR_EACH_CELL{
+                    cout<<r(i,j,k)<<endl;
+                };
 		if (maxMagnitude(r) <= tolerance) {
 			//PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
 			return true; //return p;
@@ -839,8 +920,27 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 
 
 void MACGrid::calculatePreconditioner(const GridDataMatrix & A) {
-
+    double tau=0.97;
 	precon.initialize();
+    FOR_EACH_CELL
+            {
+                double Aii = (i==0)?0:AMatrix.plusI(i-1,j,k);
+                double Aij = (j==0)?0:AMatrix.plusI(i,j-1,k);
+                double Aik = (k==0)?0:AMatrix.plusI(i,j,k-1);
+                double Aji = (i==0)?0:AMatrix.plusJ(i-1,j,k);
+                double Ajj = (j==0)?0:AMatrix.plusJ(i,j-1,k);
+                double Ajk = (k==0)?0:AMatrix.plusJ(i,j,k-1);
+                double Aki = (i==0)?0:AMatrix.plusK(i-1,j,k);
+                double Akj = (j==0)?0:AMatrix.plusK(i,j-1,k);
+                double Akk = (k==0)?0:AMatrix.plusK(i,j,k-1);
+
+                double pri = (i==0)?0:precon(i-1,j,k);
+                double prj = (j==0)?0:precon(i,j-1,k);
+                double prk = (k==0)?0:precon(i,j,k-1);
+                double e = AMatrix.diag(i,j,k) - (Aii*pri)*(Aii*pri) - (Ajj*prj)*(Ajj*prj) - (Akk*prk)*(Akk*prk) - tau*(Aii*(Aji+Aki)*pri*pri + Ajj*(Aij+Akj)*prj*prj + Akk*(Aik+Ajk)*prk*prk);
+                precon(i,j,k) = 1/sqrt(e + 10e-30);
+//                cout<<precon(i,j,k)<<endl;
+            };
 
     // TODO: Build the modified incomplete Cholesky preconditioner following Fig 4.2 on page 36 of Bridson's 2007 SIGGRAPH fluid course notes.
     //       This corresponds to filling in precon(i,j,k) for all cells
@@ -852,18 +952,24 @@ void MACGrid::applyPreconditioner(const GridData & r, const GridDataMatrix & A, 
 
     // TODO: change if(0) to if(1) after you implement calculatePreconditoner function.
 
-    if(0) {
+    if(1) {
 
         // APPLY THE PRECONDITIONER:
         // Solve Lq = r for q:
         GridData q;
+
         q.initialize();
+
+
+
         FOR_EACH_CELL {
+
                     //if (A.diag(i,j,k) != 0.0) { // If cell is a fluid.
                     double t = r(i, j, k) - A.plusI(i - 1, j, k) * precon(i - 1, j, k) * q(i - 1, j, k)
                                - A.plusJ(i, j - 1, k) * precon(i, j - 1, k) * q(i, j - 1, k)
                                - A.plusK(i, j, k - 1) * precon(i, j, k - 1) * q(i, j, k - 1);
                     q(i, j, k) = t * precon(i, j, k);
+//                    cout<<t<<endl;
                     //}
                 }
         // Solve L^Tz = q for z:
@@ -873,7 +979,7 @@ void MACGrid::applyPreconditioner(const GridData & r, const GridDataMatrix & A, 
                                - A.plusJ(i, j, k) * precon(i, j, k) * z(i, j + 1, k)
                                - A.plusK(i, j, k) * precon(i, j, k) * z(i, j, k + 1);
                     z(i, j, k) = t * precon(i, j, k);
-                    //}
+//                    cout<<q(i,j,k)<<endl;
                 }
     }
     else{

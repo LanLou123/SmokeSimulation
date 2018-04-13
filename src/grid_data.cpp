@@ -198,7 +198,7 @@ double GridData::interpolate(const vec3& pt)
 //   double fractx = scale*(pos[0] - i*theCellSize);
 //   double fracty = scale*(pos[1] - j*theCellSize);
 //   double fractz = scale*(pos[2] - k*theCellSize);
-//
+
 //#ifdef _DEBUG
 //   assert (fractx < 1.0 && fractx >= 0);
 //   assert (fracty < 1.0 && fracty >= 0);
