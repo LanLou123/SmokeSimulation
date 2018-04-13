@@ -138,56 +138,7 @@ double GridData::interpolate(const vec3& pt)
    double tmp = LERP(tmp1234, tmp5678, fractz);
    return tmp;
    */
-
-   vec3 pos = worldToSelf(pt);
-
-   int i = (int) (pos[0]/theCellSize);
-   int j = (int) (pos[1]/theCellSize);
-   int k = (int) (pos[2]/theCellSize);
-
-   double scale = 1.0/theCellSize;
-   double fractx = scale*(pos[0] - i*theCellSize);
-   double fracty = scale*(pos[1] - j*theCellSize);
-   double fractz = scale*(pos[2] - k*theCellSize);
-
-   assert (fractx < 1.0 && fractx >= 0);
-   assert (fracty < 1.0 && fracty >= 0);
-   assert (fractz < 1.0 && fractz >= 0);
-
-   // Y @ low X, low Z:
-   double tmp1 = (*this)(i,j,k);
-   double tmp2 = (*this)(i,j+1,k);
-   // Y @ high X, low Z:
-   double tmp3 = (*this)(i+1,j,k);
-   double tmp4 = (*this)(i+1,j+1,k);
-
-   // Y @ low X, high Z:
-   double tmp5 = (*this)(i,j,k+1);
-   double tmp6 = (*this)(i,j+1,k+1);
-   // Y @ high X, high Z:
-   double tmp7 = (*this)(i+1,j,k+1);
-   double tmp8 = (*this)(i+1,j+1,k+1);
-
-   // Y @ low X, low Z
-   double tmp12 = LERP(tmp1, tmp2, fracty);
-   // Y @ high X, low Z
-   double tmp34 = LERP(tmp3, tmp4, fracty);
-
-   // Y @ low X, high Z
-   double tmp56 = LERP(tmp5, tmp6, fracty);
-   // Y @ high X, high Z
-   double tmp78 = LERP(tmp7, tmp8, fracty);
-
-   // X @ low Z
-   double tmp1234 = LERP (tmp12, tmp34, fractx);
-   // X @ high Z
-   double tmp5678 = LERP (tmp56, tmp78, fractx);
-
-   // Z
-   double tmp = LERP(tmp1234, tmp5678, fractz);
-   return tmp;
-	
-	// SHARPER CUBIC INTERPOLATION:
+//============================================linear
 //   vec3 pos = worldToSelf(pt);
 //
 //   int i = (int) (pos[0]/theCellSize);
@@ -198,32 +149,81 @@ double GridData::interpolate(const vec3& pt)
 //   double fractx = scale*(pos[0] - i*theCellSize);
 //   double fracty = scale*(pos[1] - j*theCellSize);
 //   double fractz = scale*(pos[2] - k*theCellSize);
-
-//#ifdef _DEBUG
+//
 //   assert (fractx < 1.0 && fractx >= 0);
 //   assert (fracty < 1.0 && fracty >= 0);
 //   assert (fractz < 1.0 && fractz >= 0);
-//#endif
 //
+//   // Y @ low X, low Z:
+//   double tmp1 = (*this)(i,j,k);
+//   double tmp2 = (*this)(i,j+1,k);
+//   // Y @ high X, low Z:
+//   double tmp3 = (*this)(i+1,j,k);
+//   double tmp4 = (*this)(i+1,j+1,k);
 //
+//   // Y @ low X, high Z:
+//   double tmp5 = (*this)(i,j,k+1);
+//   double tmp6 = (*this)(i,j+1,k+1);
+//   // Y @ high X, high Z:
+//   double tmp7 = (*this)(i+1,j,k+1);
+//   double tmp8 = (*this)(i+1,j+1,k+1);
 //
-//   double t[4][4];
-//   double u[4];
-//   double f;
-//#define ONE 1
-//#define EVAL(a,b,c) (*this)(a,b,c)
-//	for (int x = -1; x <= 2; x++) {
-//		for (int y = -1; y <= 2; y++) {
-//			t[x+ONE][y+ONE] = CINT( EVAL(i+x,j+y,k-1), EVAL(i+x,j+y,k+0), EVAL(i+x,j+y,k+1), EVAL(i+x,j+y,k+2), fractz );
-//		}
-//	}
-//#undef EVAL
-//	for (int x = -1; x <= 2; x++) {
-//		u[x+ONE] = CINT( t[x+ONE][-1+ONE], t[x+ONE][0+ONE], t[x+ONE][1+ONE], t[x+ONE][2+ONE], fracty );
-//	}
-//	f = CINT( u[-1+ONE], u[0+ONE], u[1+ONE], u[2+ONE], fractx );
-//#undef ONE
-//	return f;
+//   // Y @ low X, low Z
+//   double tmp12 = LERP(tmp1, tmp2, fracty);
+//   // Y @ high X, low Z
+//   double tmp34 = LERP(tmp3, tmp4, fracty);
+//
+//   // Y @ low X, high Z
+//   double tmp56 = LERP(tmp5, tmp6, fracty);
+//   // Y @ high X, high Z
+//   double tmp78 = LERP(tmp7, tmp8, fracty);
+//
+//   // X @ low Z
+//   double tmp1234 = LERP (tmp12, tmp34, fractx);
+//   // X @ high Z
+//   double tmp5678 = LERP (tmp56, tmp78, fractx);
+//
+//   // Z
+//   double tmp = LERP(tmp1234, tmp5678, fractz);
+//   return tmp;
+	//=====================================cubic
+	// SHARPER CUBIC INTERPOLATION:
+    vec3 pos = worldToSelf(pt);
+
+    int i = (int) (pos[0]/theCellSize);
+    int j = (int) (pos[1]/theCellSize);
+    int k = (int) (pos[2]/theCellSize);
+
+    double scale = 1.0/theCellSize;
+    double fractx = scale*(pos[0] - i*theCellSize);
+    double fracty = scale*(pos[1] - j*theCellSize);
+    double fractz = scale*(pos[2] - k*theCellSize);
+
+#ifdef _DEBUG
+    assert (fractx < 1.0 && fractx >= 0);
+   assert (fracty < 1.0 && fracty >= 0);
+   assert (fractz < 1.0 && fractz >= 0);
+#endif
+
+
+
+    double t[4][4];
+    double u[4];
+    double f;
+#define ONE 1
+#define EVAL(a,b,c) (*this)(a,b,c)
+    for (int x = -1; x <= 2; x++) {
+        for (int y = -1; y <= 2; y++) {
+            t[x+ONE][y+ONE] = CINT( EVAL(i+x,j+y,k-1), EVAL(i+x,j+y,k+0), EVAL(i+x,j+y,k+1), EVAL(i+x,j+y,k+2), fractz );
+        }
+    }
+#undef EVAL
+    for (int x = -1; x <= 2; x++) {
+        u[x+ONE] = CINT( t[x+ONE][-1+ONE], t[x+ONE][0+ONE], t[x+ONE][1+ONE], t[x+ONE][2+ONE], fracty );
+    }
+    f = CINT( u[-1+ONE], u[0+ONE], u[1+ONE], u[2+ONE], fractx );
+#undef ONE
+    return f;
    
    /*
    // Y @ low Z:

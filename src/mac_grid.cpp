@@ -149,20 +149,20 @@ void MACGrid::updateSources()
 //                mV(i,j,k)=1e-3;
 //                mW(i,j,k)=1e-3;
 //            };
-    for(int i=24; i<25;i++){
+    for(int i=10; i<11;i++){
         for(int j=0; j<3; j++){
-            mV(i,j,0) = 30.0;
-            mU(i,j,0) = 0.0;
-            mD(i,j,0) = 1.0;
-            mT(i,j,0) = 1.0;
+            mV(i,j,1) = 40.0;
+            mU(i,j,1) = 0.0;
+            mD(i,j,1) = 1.0;
+            mT(i,j,1) = 1.0;
         }
     }
 
 
 	// Refresh particles in source.
-	for(int i=23; i<24; i++) {
-		for (int j = 0; j < 4; j++) {
-			for (int k = 0; k <= 0; k++) {
+	for(int i=10; i<11; i++) {
+		for (int j = 0; j < 3; j++) {
+			for (int k = 1; k <= 1; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
                     double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
@@ -182,36 +182,7 @@ void MACGrid::updateSources()
 
 void MACGrid::advectVelocity(double dt)
 {
-    // TODO: Calculate new velocities and store in target
-
-//    FOR_EACH_FACE
-//            {
-//                vec3 currentptfx=vec3(i*theCellSize,j*theCellSize+0.5,k*theCellSize+0.5);
-//                vec3 currentptfy=vec3(i*theCellSize+0.5,j*theCellSize,k*theCellSize+0.5);
-//                vec3 currentptfz=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize);
-////                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
-////                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
-////                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
-//                vec3 cur_vel_x=vec3(getVelocityX(currentptfx),0,0);
-//                vec3 cur_vel_y=vec3(0,getVelocityY(currentptfy),0);
-//                vec3 cur_vel_z=vec3(0,0,getVelocityZ(currentptfz));
-//                vec3 mid_pt_x=currentptfx-cur_vel_x*dt/2;
-//                vec3 mid_pt_y=currentptfy-cur_vel_y*dt/2;
-//                vec3 mid_pt_z=currentptfz-cur_vel_z*dt/2;
-//                vec3 old_pt_x=currentptfx-vec3(getVelocityX(mid_pt_x),0,0)*dt;
-//                vec3 old_pt_y=currentptfy-vec3(0,getVelocityY(mid_pt_y),0)*dt;
-//                vec3 old_pt_z=currentptfz-vec3(0,0,getVelocityZ(mid_pt_z))*dt;
-//                double newvel_x=getVelocityX(old_pt_x);
-//                double newvel_y=getVelocityY(old_pt_y);
-//                double newvel_z=getVelocityZ(old_pt_z);
-//                target.mU(i,j,k)=newvel_x;
-//                target.mV(i,j,k)=newvel_y;
-//                target.mW(i,j,k)=newvel_z;
-////                if(mV(i,j,k)>1)
-////                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
-//            };
-
-
+//Second order rugga katta
             FOR_EACH_FACE_X
                         
                     {
@@ -235,24 +206,10 @@ void MACGrid::advectVelocity(double dt)
                         vec3 midPos=curPos-getVelocity(curPos)*dt/2;
                          target.mW(i,j,k) = mW.interpolate(curPos - getVelocity(midPos)*dt);
                     }
-        
- 
-    // Then save the result to our object.
+
     mU = target.mU;
     mV = target.mV;
     mW = target.mW;
-    // TODO: Get rid of these three lines after you implement yours
-
-    // TODO: Your code is here. It builds target.mU, target.mV and target.mW for all faces
-    //
-    //
-    //
-//    FOR_EACH_FACE
-//            {
-//                if(mV(i,j,k)>1)
-//                    std::cout<<mV(i,j,k)<<":"<<i<<","<<j<<","<<k<<std::endl;
-//            };
-    // Then save the result to our object
 
 
 }
@@ -289,8 +246,6 @@ void MACGrid::advectRenderingParticles(double dt) {
         vec3 clippedBetterNextPosition = clipToGrid(betterNextPosition, currentPosition);
         rendering_particles[p] = clippedBetterNextPosition;
 		rendering_particles_vel[p] = averageVelocity;
-//        rendering_particles_vel[p]=nexv;
-//        rendering_particles[p]=nextPosition;
 	}
 }
 
@@ -318,7 +273,7 @@ void MACGrid::computeBouyancy(double dt)
     double a = 3.0, b = 3.0;
     FOR_EACH_CELL
             {
-                double s = (mD(i,j,k) + mD(i,j-1,k))/2; // CHANGED! Original: double s = (mD(i,j,k) + mD(i,j-1,k))/2;
+                double s = (mD(i,j,k) + mD(i,j-1,k))/2;
                 double T = (mT(i,j,k)+mT(i,j-1,k))/2;
                 double fbuoy = -a*s+b*T;
                 target.mV(i,j,k) += dt*fbuoy;
@@ -364,7 +319,6 @@ void MACGrid::computeVorticityConfinement(double dt) {
 
 
     // Apply the forces to the current velocity and store the result in target
-    // STARTED.
     computeCentralVel();
     computeOmega();
     computeOmegaGradient();
@@ -473,11 +427,8 @@ void MACGrid::project(double dt)
 //    OMP_NUM_THREADS=n ./my_program
 //    omp_set_num_threads(5);
 //    typedef ConjugateGradient<SparseMatrix<double>,Lower, IncompleteCholesky<double>> ICCG;
-
+//seems the only applicable eigen library for iteratively solving sigular non SPD sparse matrix.
     LeastSquaresConjugateGradient<SparseMatrix<double> > lscg;
-//    ICCG cg;
-//    cg.setTolerance(0.001);
-//    cg.setMaxIterations(500);
     lscg.compute(A);
     VectorXd x = lscg.solve(b);
 //    lscg.setMaxIterations(500);
