@@ -48,9 +48,20 @@ bool MACGrid::theDisplayVel = false;//true
       for(int j = 0; j < theDim[MACGrid::Y]+1; j++) \
          for(int i = 0; i < theDim[MACGrid::X]+1; i++) 
 
+#define FOR_EACH_FACE_X \
+   for(int k = 0; k < theDim[MACGrid::Z]; k++) \
+      for(int j = 0; j < theDim[MACGrid::Y]; j++) \
+         for(int i = 0; i < theDim[MACGrid::X]+1; i++)
 
+#define FOR_EACH_FACE_Y \
+   for(int k = 0; k < theDim[MACGrid::Z]; k++) \
+      for(int j = 0; j < theDim[MACGrid::Y]+1; j++) \
+         for(int i = 0; i < theDim[MACGrid::X]; i++)
 
-
+#define FOR_EACH_FACE_Z \
+   for(int k = 0; k < theDim[MACGrid::Z]+1; k++) \
+      for(int j = 0; j < theDim[MACGrid::Y]; j++) \
+         for(int i = 0; i < theDim[MACGrid::X]; i++)
 
 MACGrid::MACGrid()
 {
@@ -138,23 +149,18 @@ void MACGrid::updateSources()
 //                mV(i,j,k)=1e-3;
 //                mW(i,j,k)=1e-3;
 //            };
-    for(int i=10; i<12;i++){
-        for(int j=0; j<5; j++){
+    for(int i=24; i<25;i++){
+        for(int j=0; j<3; j++){
             mV(i,j,0) = 30.0;
             mU(i,j,0) = 0.0;
             mD(i,j,0) = 1.0;
             mT(i,j,0) = 1.0;
-
-            mV(i,j+1,0) =30.0;
-            mU(i,j+1,0) = 0.0;
-            mD(i,j+1,0) = 1.0;
-            mT(i,j+1,0) = 1.0;
         }
     }
 
 
 	// Refresh particles in source.
-	for(int i=10; i<12; i++) {
+	for(int i=23; i<24; i++) {
 		for (int j = 0; j < 4; j++) {
 			for (int k = 0; k <= 0; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
@@ -178,32 +184,63 @@ void MACGrid::advectVelocity(double dt)
 {
     // TODO: Calculate new velocities and store in target
 
-    FOR_EACH_FACE
-            {
-                vec3 currentptfx=vec3(i*theCellSize,j*theCellSize+0.5,k*theCellSize+0.5);
-                vec3 currentptfy=vec3(i*theCellSize+0.5,j*theCellSize,k*theCellSize+0.5);
-                vec3 currentptfz=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize);
-//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
-//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
-//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
-                vec3 cur_vel_x=vec3(getVelocityX(currentptfx),0,0);
-                vec3 cur_vel_y=vec3(0,getVelocityY(currentptfy),0);
-                vec3 cur_vel_z=vec3(0,0,getVelocityZ(currentptfz));
-                vec3 mid_pt_x=currentptfx-cur_vel_x*dt/2;
-                vec3 mid_pt_y=currentptfy-cur_vel_y*dt/2;
-                vec3 mid_pt_z=currentptfz-cur_vel_z*dt/2;
-                vec3 old_pt_x=currentptfx-vec3(getVelocityX(mid_pt_x),0,0)*dt;
-                vec3 old_pt_y=currentptfy-vec3(0,getVelocityY(mid_pt_y),0)*dt;
-                vec3 old_pt_z=currentptfz-vec3(0,0,getVelocityZ(mid_pt_z))*dt;
-                double newvel_x=getVelocityX(old_pt_x);
-                double newvel_y=getVelocityY(old_pt_y);
-                double newvel_z=getVelocityZ(old_pt_z);
-                mU(i,j,k)=newvel_x;
-                mV(i,j,k)=newvel_y;
-                mW(i,j,k)=newvel_z;
-//                if(mV(i,j,k)>1)
-//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
-            };
+//    FOR_EACH_FACE
+//            {
+//                vec3 currentptfx=vec3(i*theCellSize,j*theCellSize+0.5,k*theCellSize+0.5);
+//                vec3 currentptfy=vec3(i*theCellSize+0.5,j*theCellSize,k*theCellSize+0.5);
+//                vec3 currentptfz=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize);
+////                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
+////                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
+////                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
+//                vec3 cur_vel_x=vec3(getVelocityX(currentptfx),0,0);
+//                vec3 cur_vel_y=vec3(0,getVelocityY(currentptfy),0);
+//                vec3 cur_vel_z=vec3(0,0,getVelocityZ(currentptfz));
+//                vec3 mid_pt_x=currentptfx-cur_vel_x*dt/2;
+//                vec3 mid_pt_y=currentptfy-cur_vel_y*dt/2;
+//                vec3 mid_pt_z=currentptfz-cur_vel_z*dt/2;
+//                vec3 old_pt_x=currentptfx-vec3(getVelocityX(mid_pt_x),0,0)*dt;
+//                vec3 old_pt_y=currentptfy-vec3(0,getVelocityY(mid_pt_y),0)*dt;
+//                vec3 old_pt_z=currentptfz-vec3(0,0,getVelocityZ(mid_pt_z))*dt;
+//                double newvel_x=getVelocityX(old_pt_x);
+//                double newvel_y=getVelocityY(old_pt_y);
+//                double newvel_z=getVelocityZ(old_pt_z);
+//                target.mU(i,j,k)=newvel_x;
+//                target.mV(i,j,k)=newvel_y;
+//                target.mW(i,j,k)=newvel_z;
+////                if(mV(i,j,k)>1)
+////                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+//            };
+
+
+            FOR_EACH_FACE_X
+                        
+                    {
+                         vec3 curPos = vec3(i*theCellSize, (j+0.5)*theCellSize, (k+0.5)*theCellSize);
+                         vec3 midPos=curPos-getVelocity(curPos)*dt/2;
+                         target.mU(i,j,k) = mU.interpolate(curPos - getVelocity(midPos)*dt);
+                    };
+
+            FOR_EACH_FACE_Y
+                    {
+                         vec3 curPos = vec3((i+0.5)*theCellSize, j*theCellSize, (k+0.5)*theCellSize);
+                        vec3 midPos=curPos-getVelocity(curPos)*dt/2;
+                         target.mV(i,j,k) = mV.interpolate(curPos - getVelocity(midPos)*dt);
+                    };
+        
+    
+
+            FOR_EACH_FACE_Z
+                    {
+                         vec3 curPos = vec3((i+0.5)*theCellSize, (j+0.5)*theCellSize, k*theCellSize);
+                        vec3 midPos=curPos-getVelocity(curPos)*dt/2;
+                         target.mW(i,j,k) = mW.interpolate(curPos - getVelocity(midPos)*dt);
+                    }
+        
+ 
+    // Then save the result to our object.
+    mU = target.mU;
+    mV = target.mV;
+    mW = target.mW;
     // TODO: Get rid of these three lines after you implement yours
 
     // TODO: Your code is here. It builds target.mU, target.mV and target.mW for all faces
@@ -217,38 +254,22 @@ void MACGrid::advectVelocity(double dt)
 //            };
     // Then save the result to our object
 
-    target.mU= mU ;
-    target.mV=mV  ;
-    target.mW=mW ;
+
 }
 
 void MACGrid::advectTemperature(double dt)
 {
-    // TODO: Calculate new temp and store in target
-
-    // TODO: Get rid of this line after you implement yours
 
     FOR_EACH_CELL
             {
                 vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
-//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
-//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
-//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
                 double new_temp=getTemperature(old_pt);
-                mT(i,j,k)=new_temp;
-//                if(mV(i,j,k)>1)
-//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+                target.mT(i,j,k)=new_temp;
             };
-    // TODO: Your code is here. It builds target.mT for all cells.
-    //
-    //
-    //
-
-    // Then save the result to our object
-    target.mT = mT;
+    mT =target.mT;
 }
 
 
@@ -259,7 +280,6 @@ void MACGrid::advectRenderingParticles(double dt) {
 		vec3 currentPosition = rendering_particles[p];
         vec3 currentVelocity = getVelocity(currentPosition);
         vec3 nextPosition = currentPosition + currentVelocity * dt;
-//        std::cout<<nextPosition-currentPosition<<std::endl;
         vec3 clippedNextPosition = clipToGrid(nextPosition, currentPosition);
         // Keep going...
         vec3 nexv=getVelocity(nextPosition);
@@ -276,40 +296,25 @@ void MACGrid::advectRenderingParticles(double dt) {
 
 void MACGrid::advectDensity(double dt)
 {
-    // TODO: Calculate new densitities and store in target
-
-    // TODO: Get rid of this line after you implement yours
 
     FOR_EACH_CELL
             {
                 vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
-//                vec3 cur_vel_x=vec3(mU(i,j,k),0,0);
-//                vec3 cur_vel_y=vec3(0,mV(i,j,k),0);
-//                vec3 cur_vel_z=vec3(0,0,mW(i,j,k));
                 double cur_density=getDensity(currentptc);
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
                 double new_density=getDensity(old_pt);
-                mD(i,j,k)=new_density;
-//                if(mV(i,j,k)>1)
-//                std::cout<<"i:"<<i<<"j:"<<j<<"k:"<<k<<"     "<<mV(i,j,k)<<std::endl;
+                target.mD(i,j,k)=new_density;
             };
-    // TODO: Your code is here. It builds target.mD for all cells.
-    //
-    //
-    //
 
-    // Then save the result to our object
-    target.mD = mD;
+    mD = target.mD;
 }
 
 void MACGrid::computeBouyancy(double dt)
 {
-	// TODO: Calculate bouyancy and store in target
 
-    // TODO: Get rid of this line after you implement yours
-    target.mV = mV;
+
     double a = 3.0, b = 3.0;
     FOR_EACH_CELL
             {
@@ -318,12 +323,7 @@ void MACGrid::computeBouyancy(double dt)
                 double fbuoy = -a*s+b*T;
                 target.mV(i,j,k) += dt*fbuoy;
             };
-    // TODO: Your code is here. It modifies target.mV for all y face velocities.
-    //
-    //
-    //
 
-    // and then save the result to our object
     mV = target.mV;
 }
 
@@ -360,53 +360,47 @@ void MACGrid::computeOmegaGradient() {
 
             };
 }
-void MACGrid::computeVorticityConfinement(double dt)
-{
-   // TODO: Calculate vorticity confinement forces
+void MACGrid::computeVorticityConfinement(double dt) {
+
 
     // Apply the forces to the current velocity and store the result in target
-	// STARTED.
+    // STARTED.
     computeCentralVel();
     computeOmega();
     computeOmegaGradient();
 
-    FOR_EACH_CELL
+    FOR_EACH_CELL {
+
+                vec3 N = vec3(omegaGX(i, j, k), omegaGY(i, j, k), omegaGZ(i, j, k));
+                N = N / (N.Length() + 1e-20);
+                vec3 Omega = vec3(omegaX(i, j, k), omegaY(i, j, k), omegaZ(i, j, k));
+                vec3 confF = N ^Omega * theCellSize * theVorticityEpsilon;
+
+                vorConfFX(i, j, k) = confF[0];
+                vorConfFY(i, j, k) = confF[1];
+                vorConfFZ(i, j, k) = confF[2];
+            };
+    FOR_EACH_FACE_X
+            {
+                target.mU(i, j, k) += dt * (vorConfFX(i - 1, j, k) + vorConfFX(i, j, k)) / 2;
+            };
+    FOR_EACH_FACE_Y
             {
 
-                vec3 N=vec3(omegaGX(i,j,k),omegaGY(i,j,k),omegaGZ(i,j,k));
-                N=N/(N.Length()+1e-20);
-                vec3 Omega=vec3(omegaX(i,j,k),omegaY(i,j,k),omegaZ(i,j,k));
-                vec3 confF=N^Omega*theCellSize*theVorticityEpsilon;
+                target.mV(i, j, k) += dt * (vorConfFY(i, j - 1, k) + vorConfFY(i, j, k)) / 2;
 
-                vorConfFX(i,j,k)=confF[0];
-                vorConfFY(i,j,k)=confF[1];
-                vorConfFZ(i,j,k)=confF[2];
             };
-    FOR_EACH_FACE
+    FOR_EACH_FACE_Z
             {
-                mU(i,j,k)+=dt*(vorConfFX(i-1,j,k)+vorConfFX(i,j,k))/2;
-                mV(i,j,k)+=dt*(vorConfFY(i,j-1,k)+vorConfFY(i,j,k))/2;
-                mW(i,j,k)+=dt*(vorConfFZ(i,j,k-1)+vorConfFZ(i,j,k))/2;
+                target.mW(i, j, k) += dt * (vorConfFZ(i, j, k - 1) + vorConfFZ(i, j, k)) / 2;
             };
-    // TODO: Get rid of this line after you implement yours
 
+    // Then save the result to our object
+    mU = target.mU;
+    mV = target.mV;
+    mW = target.mW;
 
-    // TODO: Your code is here. It modifies target.mU,mV,mW for all faces.
-    //
-    //
-    //
-
-   // Then save the result to our object
-   target.mU= mU ;
-   target.mV=mV ;
-    target.mW=mW ;
-//    FOR_EACH_FACE
-//            {
-//                if(mU(i,j,k)>1)
-//                    std::cout<<mU(i,j,k)<<":"<<i<<","<<j<<","<<k<<std::endl;
-//            };
 }
-
 void MACGrid::addExternalForces(double dt)
 {
    computeBouyancy(dt);
@@ -430,8 +424,7 @@ void MACGrid::project(double dt)
     VectorXd b(size);
     VectorXd p;
     computeDivergence();
-//    GridData d;
-//    d.initialize();
+
     FOR_EACH_CELL
             {
                 int curidx= getCellIndex(i,j,k);
@@ -492,22 +485,7 @@ void MACGrid::project(double dt)
     std::cout << "#iterations:     " << lscg.iterations() << std::endl;
     std::cout << "estimated error: " << lscg.error()      << std::endl;
     std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
-//    p=x;
-//    cout<<A<<endl;
-//    cout<<b<<endl;
-//    cout<<x<<endl;
-//    for(int i=0;i<180;i++)
-//    {
-//        for(int j=0;j<180;j++) {
-//            std::cout << (i,j) <<"    ";
-//        }
-//        std::cout<<std::endl;
-//    }
-//    FOR_EACH_CELL
-//            {
-//                std::cout<<d(i,j,k)<<endl;
-//            };
-//    preconditionedConjugateGradient(AMatrix,mP,d,1000,1e-3);
+
 
 
     for(int idx=0;idx<p.size();idx++)
@@ -518,26 +496,22 @@ void MACGrid::project(double dt)
         mP(i,j,k)=p(idx);
     }
 
-   // TODO: Solve Ax = b for pressure
-   // 1. Contruct b
-   // 2. Construct A
-   // 3. Solve for p
-   // Subtract pressure from our velocity and save in target
-	// STARTED.
-FOR_EACH_FACE
+
+    FOR_EACH_FACE_X
         {
-            mU(i,j,k)+=dt*(mP(i,j,k)-mP(i-1,j,k))/(theCellSize*theAirDensity);
-            mV(i,j,k)+=dt*(mP(i,j,k)-mP(i,j-1,k))/(theCellSize*theAirDensity);
-            mW(i,j,k)+=dt*(mP(i,j,k)-mP(i,j,k-1))/(theCellSize*theAirDensity);
-//            std::cout<<mV(i,j,k)<<std::endl;
+            target.mU(i,j,k)+=dt*(mP(i,j,k)-mP(i-1,j,k))/(theCellSize*theAirDensity);
         };
-
-    // TODO: Get rid of these 3 lines after you implement your
-
-    // TODO: Your code is here. It solves for a pressure field and modifies target.mU,mV,mW for all faces.
-    //
-    //
-    //
+    FOR_EACH_FACE_Y
+            {
+                target.mV(i,j,k)+=dt*(mP(i,j,k)-mP(i,j-1,k))/(theCellSize*theAirDensity);
+            };
+    FOR_EACH_FACE_Y
+        {
+            target.mW(i,j,k)+=dt*(mP(i,j,k)-mP(i,j,k-1))/(theCellSize*theAirDensity);
+        };
+    mU = target.mU;
+    mV = target.mV;
+    mW = target.mW;
 
 	#ifdef _DEBUG
 	// Check border velocities:
