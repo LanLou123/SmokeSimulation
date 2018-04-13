@@ -186,7 +186,7 @@ void MACGrid::advectVelocity(double dt)
     target.mV= mV ;
     target.mW= mW;
 
-//Second order rugga katta
+//RK2
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
@@ -301,9 +301,6 @@ void MACGrid::computeCentralVel() {
 # endif
     FOR_EACH_CELL
             {
-//                centeral_vel_x(i,j,k)=(getVelocityX(vec3(i,j,k))+getVelocityX(vec3(i+1,j,k)))/2;
-//                centeral_vel_y(i,j,k)=(getVelocityY(vec3(i,j,k))+getVelocityY(vec3(i,j+1,k)))/2;
-//                centeral_vel_z(i,j,k)=(getVelocityZ(vec3(i,j,k))+getVelocityZ(vec3(i,j,k+1)))/2;
                 centeral_vel_x(i,j,k)=(mU(i,j,k)+mU(i+1,j,k))/2;
                 centeral_vel_y(i,j,k)=(mV(i,j,k)+mV(i,j+1,k))/2;
                 centeral_vel_z(i,j,k)=(mW(i,j,k)+mW(i,j,k+1))/2;
@@ -342,8 +339,6 @@ void MACGrid::computeVorticityConfinement(double dt) {
     target.mV= mV ;
     target.mW= mW;
 
-
-    // Apply the forces to the current velocity and store the result in target
     computeCentralVel();
     computeOmega();
     computeOmegaGradient();
@@ -741,17 +736,6 @@ vec3 MACGrid::getRewoundPosition(const vec3 & currentPosition, const double dt) 
 
 
 vec3 MACGrid::clipToGrid(const vec3& outsidePoint, const vec3& insidePoint) {
-	/*
-	// OLD:
-	vec3 rewindPosition = outsidePoint;
-	if (rewindPosition[0] < 0) rewindPosition[0] = 0; // TEMP!
-	if (rewindPosition[1] < 0) rewindPosition[1] = 0; // TEMP!
-	if (rewindPosition[2] < 0) rewindPosition[2] = 0; // TEMP!
-	if (rewindPosition[0] > theDim[MACGrid::X]) rewindPosition[0] = theDim[MACGrid::X]; // TEMP!
-	if (rewindPosition[1] > theDim[MACGrid::Y]) rewindPosition[1] = theDim[MACGrid::Y]; // TEMP!
-	if (rewindPosition[2] > theDim[MACGrid::Z]) rewindPosition[2] = theDim[MACGrid::Z]; // TEMP!
-	return rewindPosition;
-	*/
 
 	vec3 clippedPoint = outsidePoint;
 
@@ -950,7 +934,7 @@ bool endOMPloop = false;
                 endOMPloop= true;
             }
 
-            applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
+            applyPreconditioner(r, A, z); 
 
             double sigmaNew = dotProduct(z, r);
 
@@ -974,8 +958,9 @@ bool endOMPloop = false;
 
 void MACGrid::calculatePreconditioner(const GridDataMatrix & A) {
     precon.initialize();
-    const double tau = 0.97; // Tuning constant.
-    FOR_EACH_CELL{//if (A.diag(i,j,k) != 0.0)  // If cell is a fluid... put in check later for more complex scenes
+    const double tau = 0.97; 
+    FOR_EACH_CELL
+    {
                 {
                     double Aii = A.plusI(i-1,j,k) * precon(i-1,j,k);
                     double Ajj = A.plusJ(i,j-1,k) * precon(i,j-1,k);
@@ -996,8 +981,6 @@ void MACGrid::calculatePreconditioner(const GridDataMatrix & A) {
 
 
 void MACGrid::applyPreconditioner(const GridData & r, const GridDataMatrix & A, GridData & z) {
-
-    // TODO: change if(0) to if(1) after you implement calculatePreconditoner function.
 
     if(1) {
 
