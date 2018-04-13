@@ -5,7 +5,7 @@
 - added vorticity confinement
 - added projection
 - added preconditioned conjugategradient for pressure compute
-- added 
 
 unrendered smoke:
 
+![Alt Text](https://media.giphy.com/media/46zn6NeAdjtSyfP6Od/giphy.gif)
