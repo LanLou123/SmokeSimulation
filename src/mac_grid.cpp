@@ -143,16 +143,13 @@ void MACGrid::updateSources()
     // Set initial values for density, temperature, velocity
 
 
-//    FOR_EACH_FACE
-//            {
-//                mU(i,j,k)=1e-3;
-//                mV(i,j,k)=1e-3;
-//                mW(i,j,k)=1e-3;
-//            };
+
+
+
     for(int i=10; i<11;i++){
         for(int j=0; j<3; j++){
-            mV(i,j,1) = 40.0;
-            mU(i,j,1) = 0.0;
+            mV(i,j,1) = 30.0;
+            mU(i,j,1) = 2.0;
             mD(i,j,1) = 1.0;
             mT(i,j,1) = 1.0;
         }
@@ -162,7 +159,7 @@ void MACGrid::updateSources()
 	// Refresh particles in source.
 	for(int i=10; i<11; i++) {
 		for (int j = 0; j < 3; j++) {
-			for (int k = 1; k <= 1; k++) {
+			for (int k = 0; k <= 2; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
                     double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
@@ -197,8 +194,6 @@ void MACGrid::advectVelocity(double dt)
                         vec3 midPos=curPos-getVelocity(curPos)*dt/2;
                          target.mV(i,j,k) = mV.interpolate(curPos - getVelocity(midPos)*dt);
                     };
-        
-    
 
             FOR_EACH_FACE_Z
                     {
@@ -210,8 +205,6 @@ void MACGrid::advectVelocity(double dt)
     mU = target.mU;
     mV = target.mV;
     mW = target.mW;
-
-
 }
 
 void MACGrid::advectTemperature(double dt)
@@ -269,13 +262,11 @@ void MACGrid::advectDensity(double dt)
 void MACGrid::computeBouyancy(double dt)
 {
 
-
-    double a = 3.0, b = 3.0;
     FOR_EACH_CELL
             {
                 double s = (mD(i,j,k) + mD(i,j-1,k))/2;
                 double T = (mT(i,j,k)+mT(i,j-1,k))/2;
-                double fbuoy = -a*s+b*T;
+                double fbuoy = -theBuoyancyAlpha*s+theBuoyancyBeta*T;
                 target.mV(i,j,k) += dt*fbuoy;
             };
 
@@ -378,47 +369,48 @@ void MACGrid::project(double dt)
     VectorXd b(size);
     VectorXd p;
     computeDivergence();
-
+    GridData d;
+    d.initialize();
     FOR_EACH_CELL
             {
-                int curidx= getCellIndex(i,j,k);
+//                int curidx= getCellIndex(i,j,k);
 
-                int numCells=0;
-                if(isValidCell(i+1,j,k))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i+1,j,k))=-1;
-                }
-                if(isValidCell(i-1,j,k))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i-1,j,k))=-1;
-                }
-                if(isValidCell(i,j+1,k))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i,j+1,k))=-1;
-                }
-                if(isValidCell(i,j-1,k))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i,j-1,k))=-1;
-                }
-                if(isValidCell(i,j,k+1))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i,j,k+1))=-1;
-                }
-                if(isValidCell(i,j,k-1))
-                {
-                    numCells++;
-                    A.insert(curidx,getCellIndex(i,j,k-1))=-1;
-
-                }
-//                d(i,j,k)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
-                b(curidx)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
-//                cout<<b(curidx)<<endl;
-                A.insert(curidx,curidx)=numCells;
+//                int numCells=0;
+//                if(isValidCell(i+1,j,k))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i+1,j,k))=-1;
+//                }
+//                if(isValidCell(i-1,j,k))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i-1,j,k))=-1;
+//                }
+//                if(isValidCell(i,j+1,k))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i,j+1,k))=-1;
+//                }
+//                if(isValidCell(i,j-1,k))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i,j-1,k))=-1;
+//                }
+//                if(isValidCell(i,j,k+1))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i,j,k+1))=-1;
+//                }
+//                if(isValidCell(i,j,k-1))
+//                {
+//                    numCells++;
+//                    A.insert(curidx,getCellIndex(i,j,k-1))=-1;
+//
+//                }
+                d(i,j,k)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
+//                b(curidx)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
+////                cout<<b(curidx)<<endl;
+//                A.insert(curidx,curidx)=numCells;
 
             };
 //    Eigen::initParallel();
@@ -428,24 +420,25 @@ void MACGrid::project(double dt)
 //    omp_set_num_threads(5);
 //    typedef ConjugateGradient<SparseMatrix<double>,Lower, IncompleteCholesky<double>> ICCG;
 //seems the only applicable eigen library for iteratively solving sigular non SPD sparse matrix.
-    LeastSquaresConjugateGradient<SparseMatrix<double> > lscg;
-    lscg.compute(A);
-    VectorXd x = lscg.solve(b);
-//    lscg.setMaxIterations(500);
-    x=lscg.solve(b);
-    std::cout << "#iterations:     " << lscg.iterations() << std::endl;
-    std::cout << "estimated error: " << lscg.error()      << std::endl;
-    std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
+//    LeastSquaresConjugateGradient<SparseMatrix<double> > lscg;
+//    lscg.compute(A);
+//    VectorXd x = lscg.solve(b);
+////    lscg.setMaxIterations(500);
+//    x=lscg.solve(b);
+//    std::cout << "#iterations:     " << lscg.iterations() << std::endl;
+//    std::cout << "estimated error: " << lscg.error()      << std::endl;
+//    std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
+
+    preconditionedConjugateGradient(AMatrix,target.mP,d,500,0.001);
 
 
-
-    for(int idx=0;idx<p.size();idx++)
-    {
-        int u=p.size();
-        int i,j,k;
-        getCellIndexReverse(idx,i,j,k);
-        mP(i,j,k)=p(idx);
-    }
+//    for(int idx=0;idx<p.size();idx++)
+//    {
+//        int u=p.size();
+//        int i,j,k;
+//        getCellIndexReverse(idx,i,j,k);
+//        mP(i,j,k)=p(idx);
+//    }
 
 
     FOR_EACH_FACE_X
@@ -785,7 +778,7 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 	}
 	*/
 	GridData z; z.initialize();
-	applyPreconditioner(r, A, z); // Auxillary vector.
+//	applyPreconditioner(r, A, z); // Auxillary vector.
 	/*
 	PRINT_LINE("z: ");
 	FOR_EACH_CELL {
@@ -816,15 +809,12 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 		multiply(alpha, z, alphaTimesZ);
 		subtract(r, alphaTimesZ, r);
 		//r -= alpha * z;
-        FOR_EACH_CELL{
-                    cout<<r(i,j,k)<<endl;
-                };
 		if (maxMagnitude(r) <= tolerance) {
 			//PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
 			return true; //return p;
 		}
 
-		applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
+//		applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
 
 		double sigmaNew = dotProduct(z, r);
 

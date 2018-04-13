@@ -52,13 +52,13 @@
       <file leaf-file-name="mac_grid.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/mac_grid.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3347">
-              <caret line="434" column="20" lean-forward="true" selection-start-line="434" selection-start-column="20" selection-end-line="434" selection-end-column="20" />
+            <state relative-caret-position="234">
+              <caret line="431" column="34" lean-forward="false" selection-start-line="431" selection-start-column="18" selection-end-line="431" selection-end-column="36" />
               <folding>
                 <element signature="e#79#100#0" expanded="true" />
-                <element signature="e#13546#14709#0" expanded="true" />
-                <element signature="e#14781#15455#0" expanded="true" />
-                <element signature="e#18413#18685#0" expanded="true" />
+                <element signature="e#13580#14743#0" expanded="false" />
+                <element signature="e#14815#15489#0" expanded="false" />
+                <element signature="e#18447#18719#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -87,7 +87,7 @@
       <file leaf-file-name="mac_grid.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/mac_grid.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1152">
+            <state relative-caret-position="72">
               <caret line="64" column="11" lean-forward="false" selection-start-line="64" selection-start-column="11" selection-end-line="64" selection-end-column="11" />
               <folding>
                 <element signature="e#81#110#0" expanded="true" />
@@ -99,7 +99,7 @@
       <file leaf-file-name="smoke_sim.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/smoke_sim.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="18">
+            <state relative-caret-position="252">
               <caret line="14" column="20" lean-forward="false" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
               <folding />
             </state>
@@ -109,8 +109,8 @@
       <file leaf-file-name="constants.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/constants.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="162">
-              <caret line="9" column="28" lean-forward="false" selection-start-line="9" selection-start-column="28" selection-end-line="9" selection-end-column="28" />
+            <state relative-caret-position="360">
+              <caret line="20" column="37" lean-forward="false" selection-start-line="20" selection-start-column="37" selection-end-line="20" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -119,7 +119,7 @@
       <file leaf-file-name="grid_data.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/grid_data.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-540">
+            <state relative-caret-position="3384">
               <caret line="188" column="48" lean-forward="false" selection-start-line="188" selection-start-column="48" selection-end-line="188" selection-end-column="48" />
               <folding>
                 <element signature="e#5137#5256#0" expanded="true" />
@@ -167,6 +167,7 @@
       <find>target.mV(i,j,k)</find>
       <find>target</find>
       <find>posG</find>
+      <find>cout</find>
     </findStrings>
     <replaceStrings>
       <replace>mW(i,j,k)</replace>
@@ -186,8 +187,8 @@
         <option value="$PROJECT_DIR$/src/camera.cpp" />
         <option value="$PROJECT_DIR$/src/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/src/smoke_sim.cpp" />
-        <option value="$PROJECT_DIR$/src/constants.cpp" />
         <option value="$PROJECT_DIR$/src/grid_data.cpp" />
+        <option value="$PROJECT_DIR$/src/constants.cpp" />
         <option value="$PROJECT_DIR$/src/mac_grid.cpp" />
       </list>
     </option>
@@ -200,10 +201,10 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="241" />
-    <option name="y" value="94" />
+    <option name="x" value="222" />
+    <option name="y" value="42" />
     <option name="width" value="729" />
-    <option name="height" value="524" />
+    <option name="height" value="552" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -307,12 +308,13 @@
       <workItem from="1523497597403" duration="3848000" />
       <workItem from="1523553870943" duration="9209000" />
       <workItem from="1523584206004" duration="1914000" />
-      <workItem from="1523589412184" duration="4138000" />
+      <workItem from="1523589412184" duration="7581000" />
+      <workItem from="1523634263421" duration="365000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="122109000" />
+    <option name="totallyTimeSpent" value="125917000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
@@ -320,17 +322,17 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0948787" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3210634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2597137" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.38752556" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3997955" sideWeight="0.5018868" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29550102" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.69138753" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18916155" sideWeight="0.49811321" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3210634" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -348,18 +350,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mac_grid.cpp</url>
-          <line>816</line>
-          <option name="timeStamp" value="48" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/mac_grid.cpp</url>
-          <line>821</line>
-          <option name="timeStamp" value="50" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="55" />
     </breakpoint-manager>
     <watches-manager />
@@ -455,9 +445,9 @@
           <caret line="11" column="22" lean-forward="true" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
           <folding>
             <element signature="e#79#100#0" expanded="true" />
-            <element signature="e#13546#14709#0" expanded="true" />
-            <element signature="e#14781#15455#0" expanded="true" />
-            <element signature="e#18413#18685#0" expanded="true" />
+            <element signature="e#13580#14743#0" expanded="true" />
+            <element signature="e#14815#15489#0" expanded="true" />
+            <element signature="e#18447#18719#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -517,9 +507,9 @@
           <caret line="141" column="17" lean-forward="false" selection-start-line="141" selection-start-column="17" selection-end-line="141" selection-end-column="17" />
           <folding>
             <element signature="e#79#100#0" expanded="true" />
-            <element signature="e#13546#14709#0" expanded="true" />
-            <element signature="e#14781#15455#0" expanded="true" />
-            <element signature="e#18413#18685#0" expanded="true" />
+            <element signature="e#13580#14743#0" expanded="true" />
+            <element signature="e#14815#15489#0" expanded="true" />
+            <element signature="e#18447#18719#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -530,9 +520,9 @@
           <caret line="134" column="45" lean-forward="false" selection-start-line="134" selection-start-column="45" selection-end-line="134" selection-end-column="45" />
           <folding>
             <element signature="e#79#100#0" expanded="true" />
-            <element signature="e#13546#14709#0" expanded="true" />
-            <element signature="e#14781#15455#0" expanded="true" />
-            <element signature="e#18413#18685#0" expanded="true" />
+            <element signature="e#13580#14743#0" expanded="true" />
+            <element signature="e#14815#15489#0" expanded="true" />
+            <element signature="e#18447#18719#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -570,7 +560,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="12" column="29" lean-forward="false" selection-start-line="12" selection-start-column="29" selection-end-line="12" selection-end-column="29" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -692,7 +681,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
           <caret line="15" column="20" lean-forward="false" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -746,21 +734,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/mac_grid.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1152">
-          <caret line="64" column="11" lean-forward="false" selection-start-line="64" selection-start-column="11" selection-end-line="64" selection-end-column="11" />
-          <folding>
-            <element signature="e#81#110#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/c++/5/bits/stl_multimap.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="172">
           <caret line="94" column="10" lean-forward="false" selection-start-line="94" selection-start-column="10" selection-end-line="94" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -768,7 +745,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="172">
           <caret line="194" column="4" lean-forward="false" selection-start-line="194" selection-start-column="4" selection-end-line="194" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -780,25 +756,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/smoke_sim.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="14" column="20" lean-forward="false" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/constants.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" column="28" lean-forward="false" selection-start-line="9" selection-start-column="28" selection-end-line="9" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/grid_data.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-540">
+        <state relative-caret-position="3384">
           <caret line="188" column="48" lean-forward="false" selection-start-line="188" selection-start-column="48" selection-end-line="188" selection-end-column="48" />
           <folding>
             <element signature="e#5137#5256#0" expanded="true" />
@@ -806,15 +766,41 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/smoke_sim.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="20" lean-forward="false" selection-start-line="14" selection-start-column="20" selection-end-line="14" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/constants.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="20" column="37" lean-forward="false" selection-start-line="20" selection-start-column="37" selection-end-line="20" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/mac_grid.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="64" column="11" lean-forward="false" selection-start-line="64" selection-start-column="11" selection-end-line="64" selection-end-column="11" />
+          <folding>
+            <element signature="e#81#110#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/mac_grid.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3347">
-          <caret line="434" column="20" lean-forward="true" selection-start-line="434" selection-start-column="20" selection-end-line="434" selection-end-column="20" />
+        <state relative-caret-position="234">
+          <caret line="431" column="34" lean-forward="false" selection-start-line="431" selection-start-column="18" selection-end-line="431" selection-end-column="36" />
           <folding>
             <element signature="e#79#100#0" expanded="true" />
-            <element signature="e#13546#14709#0" expanded="true" />
-            <element signature="e#14781#15455#0" expanded="true" />
-            <element signature="e#18413#18685#0" expanded="true" />
+            <element signature="e#13580#14743#0" expanded="true" />
+            <element signature="e#14815#15489#0" expanded="true" />
+            <element signature="e#18447#18719#0" expanded="true" />
           </folding>
         </state>
       </provider>
