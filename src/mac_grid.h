@@ -2,7 +2,7 @@
 #define MACGrid_H_
 
 #pragma warning(disable: 4244 4267 4996)
-# define OMParallelize
+//# define OMParallelize
 
 # ifdef OMParallelize
 # define TOTALThreads 8
@@ -69,7 +69,7 @@ protected:
 	double getDensity(const vec3& pt);
 	vec3 getCenter(int i, int j, int k);
 
-	
+	void checkPressure( int& i, int& j, int& k, const GridData& p, vec3& pLow, vec3& pHigh );
 	vec3 getRewoundPosition(const vec3 & currentPosition, const double dt);
 	vec3 clipToGrid(const vec3& outsidePoint, const vec3& insidePoint);
 	double getSize(int dimension);
@@ -81,6 +81,7 @@ protected:
 	vec3 getFacePosition(int dimension, int i, int j, int k);
 	void calculateAMatrix();
 	bool preconditionedConjugateGradient(const GridDataMatrix & A, GridData & p, const GridData & d, int maxIterations, double tolerance);
+    bool conjugateGradient(const GridDataMatrix & A, GridData & p, const GridData & d, int maxIterations, double tolerance);
 	void calculatePreconditioner(const GridDataMatrix & A);
 	void applyPreconditioner(const GridData & r, const GridDataMatrix & A, GridData & z);
 	double dotProduct(const GridData & vector1, const GridData & vector2);

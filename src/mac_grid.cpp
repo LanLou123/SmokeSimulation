@@ -128,7 +128,7 @@ void MACGrid::reset()
     diverGence.initialize(0.0);
 
     calculateAMatrix();
-//    calculatePreconditioner(AMatrix);
+    calculatePreconditioner(AMatrix);
     int l=0;
 }
 
@@ -146,20 +146,23 @@ void MACGrid::updateSources()
 
 
 
-    for(int i=10; i<11;i++){
+    for(int i=12; i<15;i++){
         for(int j=0; j<3; j++){
-            mV(i,j,1) = 30.0;
-            mU(i,j,1) = 2.0;
-            mD(i,j,1) = 1.0;
-            mT(i,j,1) = 1.0;
+            for(int k=1;k<4;k++)
+            {
+                mV(i, j, k) = 22.0;
+                mU(i, j, k) = 0.0;
+                mD(i, j, k) = 1.0;
+                mT(i, j, k) = 1.0;
+            }
         }
     }
 
 
 	// Refresh particles in source.
-	for(int i=10; i<11; i++) {
+	for(int i=13; i<14; i++) {
 		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k <= 2; k++) {
+			for (int k = 3; k <= 3; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
                     double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
@@ -179,6 +182,10 @@ void MACGrid::updateSources()
 
 void MACGrid::advectVelocity(double dt)
 {
+    target.mU= mU ;
+    target.mV= mV ;
+    target.mW= mW;
+
 //Second order rugga katta
 # ifdef OMParallelize
 # pragma omp parallel for
@@ -215,6 +222,7 @@ void MACGrid::advectVelocity(double dt)
 
 void MACGrid::advectTemperature(double dt)
 {
+    target.mT= mT;
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
@@ -252,6 +260,7 @@ void MACGrid::advectRenderingParticles(double dt) {
 
 void MACGrid::advectDensity(double dt)
 {
+    target.mD=mD;
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
@@ -271,6 +280,7 @@ void MACGrid::advectDensity(double dt)
 
 void MACGrid::computeBouyancy(double dt)
 {
+    target.mV=mV;
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
@@ -328,6 +338,9 @@ void MACGrid::computeOmegaGradient() {
             };
 }
 void MACGrid::computeVorticityConfinement(double dt) {
+    target.mU= mU ;
+    target.mV= mV ;
+    target.mW= mW;
 
 
     // Apply the forces to the current velocity and store the result in target
@@ -389,116 +402,184 @@ void MACGrid::computeDivergence()
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
-    FOR_EACH_CELL
-            {
-                diverGence(i,j,k)=(mU(i+1,j,k)+mV(i,j+1,k)+mW(i,j,k+1)-mU(i,j,k)-mV(i,j,k)-mW(i,j,k))/theCellSize;
+    FOR_EACH_CELL {
 
-            };
+
+// Construct the vector of divergences d:
+                double velLowX = mU(i, j, k);
+                double velHighX = mU(i + 1, j, k);
+                double velLowY = mV(i, j, k);
+                double velHighY = mV(i, j + 1, k);
+                double velLowZ = mW(i, j, k);
+                double velHighZ = mW(i, j, k + 1);
+
+                // Use 0 for solid boundary velocities:
+                if (i == 0) {
+                    velLowX = 0.0;
+                }
+                if (j == 0)
+                {
+                    velLowY = 0.0;
+                }
+                if (k == 0)
+                {
+                    velLowZ = 0.0;
+                }
+
+                if (i + 1 == theDim[MACGrid::X])
+                {
+                    velHighX = 0.0;
+                }
+                if (j + 1 == theDim[MACGrid::Y])
+                {
+                    velHighY = 0.0;
+                }
+                if (k + 1 == theDim[MACGrid::Z])
+                {
+                    velHighZ = 0.0;
+                }
+                diverGence(i,j,k)=-((velHighX - velLowX) + (velHighY - velLowY) + (velHighZ - velLowZ)) / theCellSize;
+            }
+
+
+}
+
+
+
+void MACGrid::checkPressure( int& i, int& j, int& k, const GridData& p, vec3& minPressurebound, vec3& maxPressurebound )
+{
+
+    if (isValidFace(MACGrid::X, i, j, k))
+    {
+        if (i-1 >= 0)
+        {
+            minPressurebound[0] = p(i-1,j,k);
+        }
+
+        if (i < theDim[MACGrid::X])
+        {
+            maxPressurebound[0] = p(i,j,k);
+        }
+
+        if (i-1 < 0)
+        {
+            minPressurebound[0] = maxPressurebound[0] - theBoundConstant * (mU(i,j,k) - 0);
+        }
+
+        if (i >= theDim[MACGrid::X])
+        {
+            maxPressurebound[0] = minPressurebound[0] + theBoundConstant * (mU(i,j,k) - 0);
+        }
+
+    }
+    if (isValidFace(MACGrid::Y, i, j, k))
+    {
+        if (j-1 >= 0)
+        {
+            minPressurebound[1] = p(i,j-1,k);
+        }
+
+        if (j < theDim[MACGrid::Y])
+        {
+            maxPressurebound[1] = p(i,j,k);
+        }
+
+        if (j-1 < 0)
+        {
+            minPressurebound[1] = maxPressurebound[1] - theBoundConstant * (mV(i,j,k) - 0);
+        }
+
+        if (j >= theDim[MACGrid::Y])
+        {
+            maxPressurebound[1] = minPressurebound[1] + theBoundConstant * (mV(i,j,k) - 0);
+        }
+    }
+    if (isValidFace(MACGrid::Z, i, j, k))
+    {
+        if (k-1 >= 0)
+        {
+            minPressurebound[2] = p(i,j,k-1);
+        }
+
+        if (k < theDim[MACGrid::Z])
+        {
+            maxPressurebound[2] = p(i,j,k);
+        }
+
+        if (k-1 < 0)
+        {
+            minPressurebound[2] = maxPressurebound[2] - theBoundConstant * (mW(i,j,k) - 0);
+        }
+
+        if (k >= theDim[MACGrid::Z])
+        {
+            maxPressurebound[2] = minPressurebound[2] + theBoundConstant * (mW(i,j,k) - 0);
+        }
+    }
 }
 
 void MACGrid::project(double dt)
 {
+    target.mU= mU ;
+    target.mV= mV ;
+    target.mW= mW;
+    target.mP=mP;
     int size=theDim[MACGrid::X]*theDim[MACGrid::Y]*theDim[MACGrid::Z];
     SparseMatrix<double> A(size,size);
     A.setZero();
     VectorXd b(size);
-    VectorXd p;
-    computeDivergence();
+    double pho =1;
+    const double constant = (pho * (theCellSize * theCellSize))/dt; // Why square not cube
+
+    GridData p;
     GridData d;
     d.initialize();
+    p.initialize();
+    // Construct d
+    diverGence.initialize();
+    computeDivergence();
+    preconditionedConjugateGradient(AMatrix,p,diverGence,1000,0.01);
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
     FOR_EACH_CELL
             {
-//                int curidx= getCellIndex(i,j,k);
+                p(i,j,k) *= constant;
+                target.mP(i,j,k) = p(i,j,k);
+            }
 
-//                int numCells=0;
-//                if(isValidCell(i+1,j,k))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i+1,j,k))=-1;
-//                }
-//                if(isValidCell(i-1,j,k))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i-1,j,k))=-1;
-//                }
-//                if(isValidCell(i,j+1,k))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i,j+1,k))=-1;
-//                }
-//                if(isValidCell(i,j-1,k))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i,j-1,k))=-1;
-//                }
-//                if(isValidCell(i,j,k+1))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i,j,k+1))=-1;
-//                }
-//                if(isValidCell(i,j,k-1))
-//                {
-//                    numCells++;
-//                    A.insert(curidx,getCellIndex(i,j,k-1))=-1;
-//
-//                }
-                d(i,j,k)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
-//                b(curidx)=-pow(theCellSize,2)*diverGence(i,j,k)/dt*theAirDensity;
-////                cout<<b(curidx)<<endl;
-//                A.insert(curidx,curidx)=numCells;
-
-            };
-//    Eigen::initParallel();
-//    Eigen::setNbThreads(5);
-//    omp_set_num_threads(5);
-//    OMP_NUM_THREADS=n ./my_program
-//    omp_set_num_threads(5);
-//    typedef ConjugateGradient<SparseMatrix<double>,Lower, IncompleteCholesky<double>> ICCG;
-//seems the only applicable eigen library for iteratively solving sigular non SPD sparse matrix.
-//    LeastSquaresConjugateGradient<SparseMatrix<double> > lscg;
-//    lscg.compute(A);
-//    VectorXd x = lscg.solve(b);
-////    lscg.setMaxIterations(500);
-//    x=lscg.solve(b);
-//    std::cout << "#iterations:     " << lscg.iterations() << std::endl;
-//    std::cout << "estimated error: " << lscg.error()      << std::endl;
-//    std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
-
-
-    preconditionedConjugateGradient(AMatrix,target.mP,d,500,0.001);
-
-
-//    for(int idx=0;idx<p.size();idx++)
-//    {
-//        int u=p.size();
-//        int i,j,k;
-//        getCellIndexReverse(idx,i,j,k);
-//        mP(i,j,k)=p(idx);
-//    }
+mP=target.mP;
 
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
     FOR_EACH_FACE_X
         {
-            target.mU(i,j,k)+=dt*(mP(i,j,k)-mP(i-1,j,k))/(theCellSize*theAirDensity);
+            vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
+            vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
+            checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
+            target.mU(i,j,k) = mU(i,j,k) - (dt / pho) * (maxPressurebound[0] - minPressurebound[0]) / theCellSize;
         };
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
     FOR_EACH_FACE_Y
             {
-                target.mV(i,j,k)+=dt*(mP(i,j,k)-mP(i,j-1,k))/(theCellSize*theAirDensity);
+                vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
+                vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
+                checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
+                target.mV(i,j,k) = mV(i,j,k) - (dt / pho) * (maxPressurebound[1] - minPressurebound[1]) / theCellSize;
             };
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
-    FOR_EACH_FACE_Y
+    FOR_EACH_FACE_Z
         {
-            target.mW(i,j,k)+=dt*(mP(i,j,k)-mP(i,j,k-1))/(theCellSize*theAirDensity);
+            vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
+            vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
+            checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
+            target.mW(i,j,k) = mW(i,j,k) - (dt / pho) * (maxPressurebound[2] - minPressurebound[2]) / theCellSize;
+
         };
     mU = target.mU;
     mV = target.mV;
@@ -809,45 +890,42 @@ void MACGrid::calculateAMatrix() {
 	}
 }
 
+
+
+
 bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData & p, const GridData & d, int maxIterations, double tolerance) {
-	// Solves Ap = d for p.
-# ifdef OMParallelize
-# pragma omp parallel for
-# endif
-	FOR_EACH_CELL {
-		p(i,j,k) = 0.0; // Initial guess p = 0.	
-	}
+    FOR_EACH_CELL
+            {
+                p(i,j,k) = 0.0; // Initial guess p = 0.
+            }
 
-	GridData r = d; // Residual vector.
+    GridData r = d; // Residual vector.
 
-	/*
-	PRINT_LINE("r: ");
-	FOR_EACH_CELL {
-		PRINT_LINE(r(i,j,k));
-	}
-	*/
-	GridData z; z.initialize();
-//	applyPreconditioner(r, A, z); // Auxillary vector.
-	/*
-	PRINT_LINE("z: ");
-	FOR_EACH_CELL {
-		PRINT_LINE(z(i,j,k));
-	}
-	*/
+    /*
+    PRINT_LINE("r: ");
+    FOR_EACH_CELL {
+        PRINT_LINE(r(i,j,k));
+    }
+    */
+    GridData z; z.initialize();
+    applyPreconditioner(r, A, z); // Auxillary vector.
+    /*
+    PRINT_LINE("z: ");
+    FOR_EACH_CELL {
+        PRINT_LINE(z(i,j,k));
+    }
+    */
 
-	GridData s;
-    s.initialize();
-    s = z; // Search vector;
+bool endOMPloop = false;
 
-	double sigma = dotProduct(z, r);
-    bool cancelOMPloop=false;
-# ifdef OMParallelize
-# pragma omp parallel for
-# endif
-	for (int iteration = 0; iteration < maxIterations; iteration++)
-    {
-        if(!cancelOMPloop)
-        {
+    GridData s = z; // Search vector;
+
+    double sigma = dotProduct(z, r);
+//# ifdef OMParallelize
+//# pragma omp parallel for
+//# endif
+    for (int iteration = 0; iteration < maxIterations; iteration++) {
+        if (!endOMPloop) {
             double rho = sigma; // According to TA. Here???
 
             apply(A, s, z); // z = applyA(s);
@@ -865,14 +943,14 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
             multiply(alpha, z, alphaTimesZ);
             subtract(r, alphaTimesZ, r);
             //r -= alpha * z;
+
             if (maxMagnitude(r) <= tolerance)
             {
-                PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
-                cancelOMPloop = true; //return p;
-
+                //PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
+                endOMPloop= true;
             }
 
-//		applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
+            applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
 
             double sigmaNew = dotProduct(z, r);
 
@@ -887,42 +965,32 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
             sigma = sigmaNew;
         }
     }
-
-    return cancelOMPloop;
-    if(!cancelOMPloop)
-	PRINT_LINE( "PCG didn't converge!" );
+    return endOMPloop;
+    if(!endOMPloop)
+    PRINT_LINE( "PCG didn't converge!" );
 
 }
 
 
 void MACGrid::calculatePreconditioner(const GridDataMatrix & A) {
-    double tau=0.97;
-	precon.initialize();
-# ifdef OMParallelize
-# pragma omp parallel for
-# endif
-    FOR_EACH_CELL
-            {
-                double Aii = (i==0)?0:AMatrix.plusI(i-1,j,k);
-                double Aij = (j==0)?0:AMatrix.plusI(i,j-1,k);
-                double Aik = (k==0)?0:AMatrix.plusI(i,j,k-1);
-                double Aji = (i==0)?0:AMatrix.plusJ(i-1,j,k);
-                double Ajj = (j==0)?0:AMatrix.plusJ(i,j-1,k);
-                double Ajk = (k==0)?0:AMatrix.plusJ(i,j,k-1);
-                double Aki = (i==0)?0:AMatrix.plusK(i-1,j,k);
-                double Akj = (j==0)?0:AMatrix.plusK(i,j-1,k);
-                double Akk = (k==0)?0:AMatrix.plusK(i,j,k-1);
+    precon.initialize();
+    const double tau = 0.97; // Tuning constant.
+    FOR_EACH_CELL{//if (A.diag(i,j,k) != 0.0)  // If cell is a fluid... put in check later for more complex scenes
+                {
+                    double Aii = A.plusI(i-1,j,k) * precon(i-1,j,k);
+                    double Ajj = A.plusJ(i,j-1,k) * precon(i,j-1,k);
+                    double Akk = A.plusK(i,j,k-1) * precon(i,j,k-1);
+                    double Aijk = Aii*Aii + Ajj*Ajj + Akk*Akk;
 
-                double pri = (i==0)?0:precon(i-1,j,k);
-                double prj = (j==0)?0:precon(i,j-1,k);
-                double prk = (k==0)?0:precon(i,j,k-1);
-                double e = AMatrix.diag(i,j,k) - (Aii*pri)*(Aii*pri) - (Ajj*prj)*(Ajj*prj) - (Akk*prk)*(Akk*prk) - tau*(Aii*(Aji+Aki)*pri*pri + Ajj*(Aij+Akj)*prj*prj + Akk*(Aik+Ajk)*prk*prk);
-                precon(i,j,k) = 1/sqrt(e + 10e-30);
-//                cout<<precon(i,j,k)<<endl;
-            };
+                    double Aiii = Aii * (A.plusJ(i-1,j,k) + A.plusK(i-1,j,k)) * precon(i-1,j,k);
+                    double Ajjj = Ajj * (A.plusI(i,j-1,k) + A.plusK(i,j-1,k)) * precon(i,j-1,k);
+                    double Akkk = Akk * (A.plusI(i,j,k-1) + A.plusJ(i,j,k-1)) * precon(i,j,k-1);
+                    double temp = Aijk + tau * (Aiii + Ajjj + Akkk);
 
-    // TODO: Build the modified incomplete Cholesky preconditioner following Fig 4.2 on page 36 of Bridson's 2007 SIGGRAPH fluid course notes.
-    //       This corresponds to filling in precon(i,j,k) for all cells
+                    double e = A.diag(i,j,k) - temp;
+                    precon(i,j,k) = 1.0 / sqrt(e + 1e-30);
+                }
+            }
 
 }
 
@@ -936,19 +1004,13 @@ void MACGrid::applyPreconditioner(const GridData & r, const GridDataMatrix & A, 
         // APPLY THE PRECONDITIONER:
         // Solve Lq = r for q:
         GridData q;
-
         q.initialize();
-
-
-
         FOR_EACH_CELL {
-
                     //if (A.diag(i,j,k) != 0.0) { // If cell is a fluid.
                     double t = r(i, j, k) - A.plusI(i - 1, j, k) * precon(i - 1, j, k) * q(i - 1, j, k)
                                - A.plusJ(i, j - 1, k) * precon(i, j - 1, k) * q(i, j - 1, k)
                                - A.plusK(i, j, k - 1) * precon(i, j, k - 1) * q(i, j, k - 1);
                     q(i, j, k) = t * precon(i, j, k);
-//                    cout<<t<<endl;
                     //}
                 }
         // Solve L^Tz = q for z:
@@ -958,7 +1020,7 @@ void MACGrid::applyPreconditioner(const GridData & r, const GridDataMatrix & A, 
                                - A.plusJ(i, j, k) * precon(i, j, k) * z(i, j + 1, k)
                                - A.plusK(i, j, k) * precon(i, j, k) * z(i, j, k + 1);
                     z(i, j, k) = t * precon(i, j, k);
-//                    cout<<q(i,j,k)<<endl;
+                    //}
                 }
     }
     else{
@@ -984,9 +1046,13 @@ double MACGrid::dotProduct(const GridData & vector1, const GridData & vector2) {
 
 
 void MACGrid::add(const GridData & vector1, const GridData & vector2, GridData & result) {
-	
+
+
 	FOR_EACH_CELL {
+                if(vector1(i,j,k)!=NAN&&vector2(i,j,k)!=NAN)
 		result(i,j,k) = vector1(i,j,k) + vector2(i,j,k);
+                else
+                    cout<<i<<","<<j<<""<<k<<endl;
 	}
 
 }
