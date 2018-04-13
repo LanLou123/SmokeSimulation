@@ -9,4 +9,4 @@
 
 unrendered smoke:
 
-      ![Alt Text](https://media.giphy.com/media/B0gFgEBi722XCfwQgU/giphy.gif)
+![Alt Text](https://media.giphy.com/media/B0gFgEBi722XCfwQgU/giphy.gif)
