@@ -2,7 +2,11 @@
 #define MACGrid_H_
 
 #pragma warning(disable: 4244 4267 4996)
+# define OMParallelize
 
+# ifdef OMParallelize
+# define TOTALThreads 8
+# endif
 #include "open_gl_headers.h" 
 #include "vec.h"
 #include "grid_data.h"

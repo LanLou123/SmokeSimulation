@@ -128,7 +128,7 @@ void MACGrid::reset()
     diverGence.initialize(0.0);
 
     calculateAMatrix();
-    calculatePreconditioner(AMatrix);
+//    calculatePreconditioner(AMatrix);
     int l=0;
 }
 
@@ -180,21 +180,27 @@ void MACGrid::updateSources()
 void MACGrid::advectVelocity(double dt)
 {
 //Second order rugga katta
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
             FOR_EACH_FACE_X
-                        
                     {
                          vec3 curPos = vec3(i*theCellSize, (j+0.5)*theCellSize, (k+0.5)*theCellSize);
                          vec3 midPos=curPos-getVelocity(curPos)*dt/2;
                          target.mU(i,j,k) = mU.interpolate(curPos - getVelocity(midPos)*dt);
                     };
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
             FOR_EACH_FACE_Y
                     {
                          vec3 curPos = vec3((i+0.5)*theCellSize, j*theCellSize, (k+0.5)*theCellSize);
                         vec3 midPos=curPos-getVelocity(curPos)*dt/2;
                          target.mV(i,j,k) = mV.interpolate(curPos - getVelocity(midPos)*dt);
                     };
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
             FOR_EACH_FACE_Z
                     {
                          vec3 curPos = vec3((i+0.5)*theCellSize, (j+0.5)*theCellSize, k*theCellSize);
@@ -209,7 +215,9 @@ void MACGrid::advectVelocity(double dt)
 
 void MACGrid::advectTemperature(double dt)
 {
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
@@ -244,7 +252,9 @@ void MACGrid::advectRenderingParticles(double dt) {
 
 void MACGrid::advectDensity(double dt)
 {
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
@@ -261,7 +271,9 @@ void MACGrid::advectDensity(double dt)
 
 void MACGrid::computeBouyancy(double dt)
 {
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 double s = (mD(i,j,k) + mD(i,j-1,k))/2;
@@ -274,6 +286,9 @@ void MACGrid::computeBouyancy(double dt)
 }
 
 void MACGrid::computeCentralVel() {
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
 //                centeral_vel_x(i,j,k)=(getVelocityX(vec3(i,j,k))+getVelocityX(vec3(i+1,j,k)))/2;
@@ -286,6 +301,9 @@ void MACGrid::computeCentralVel() {
 }
 
 void MACGrid::computeOmega() {
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 omegaX(i,j,k)=(centeral_vel_z(i,j+1,k)-centeral_vel_z(i,j-1,k)-centeral_vel_y(i,j,k+1)+centeral_vel_y(i,j,k-1))/(2*theCellSize);
@@ -298,6 +316,9 @@ void MACGrid::computeOmega() {
 }
 
 void MACGrid::computeOmegaGradient() {
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 omegaGX(i,j,k)=(omegaN(i+1,j,k)-omegaN(i-1,j,k))/(2*theCellSize);
@@ -313,7 +334,9 @@ void MACGrid::computeVorticityConfinement(double dt) {
     computeCentralVel();
     computeOmega();
     computeOmegaGradient();
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL {
 
                 vec3 N = vec3(omegaGX(i, j, k), omegaGY(i, j, k), omegaGZ(i, j, k));
@@ -325,16 +348,25 @@ void MACGrid::computeVorticityConfinement(double dt) {
                 vorConfFY(i, j, k) = confF[1];
                 vorConfFZ(i, j, k) = confF[2];
             };
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_X
             {
                 target.mU(i, j, k) += dt * (vorConfFX(i - 1, j, k) + vorConfFX(i, j, k)) / 2;
             };
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_Y
             {
 
                 target.mV(i, j, k) += dt * (vorConfFY(i, j - 1, k) + vorConfFY(i, j, k)) / 2;
 
             };
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_Z
             {
                 target.mW(i, j, k) += dt * (vorConfFZ(i, j, k - 1) + vorConfFZ(i, j, k)) / 2;
@@ -354,6 +386,9 @@ void MACGrid::addExternalForces(double dt)
 
 void MACGrid::computeDivergence()
 {
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 diverGence(i,j,k)=(mU(i+1,j,k)+mV(i,j+1,k)+mW(i,j,k+1)-mU(i,j,k)-mV(i,j,k)-mW(i,j,k))/theCellSize;
@@ -371,6 +406,9 @@ void MACGrid::project(double dt)
     computeDivergence();
     GridData d;
     d.initialize();
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
 //                int curidx= getCellIndex(i,j,k);
@@ -429,6 +467,7 @@ void MACGrid::project(double dt)
 //    std::cout << "estimated error: " << lscg.error()      << std::endl;
 //    std::cout<<"threads"<<Eigen::nbThreads( )<<endl;
 
+
     preconditionedConjugateGradient(AMatrix,target.mP,d,500,0.001);
 
 
@@ -440,15 +479,23 @@ void MACGrid::project(double dt)
 //        mP(i,j,k)=p(idx);
 //    }
 
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_X
         {
             target.mU(i,j,k)+=dt*(mP(i,j,k)-mP(i-1,j,k))/(theCellSize*theAirDensity);
         };
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_Y
             {
                 target.mV(i,j,k)+=dt*(mP(i,j,k)-mP(i,j-1,k))/(theCellSize*theAirDensity);
             };
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_FACE_Y
         {
             target.mW(i,j,k)+=dt*(mP(i,j,k)-mP(i,j,k-1))/(theCellSize*theAirDensity);
@@ -764,7 +811,9 @@ void MACGrid::calculateAMatrix() {
 
 bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData & p, const GridData & d, int maxIterations, double tolerance) {
 	// Solves Ap = d for p.
-
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
 	FOR_EACH_CELL {
 		p(i,j,k) = 0.0; // Initial guess p = 0.	
 	}
@@ -791,45 +840,57 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
     s = z; // Search vector;
 
 	double sigma = dotProduct(z, r);
+    bool cancelOMPloop=false;
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
+	for (int iteration = 0; iteration < maxIterations; iteration++)
+    {
+        if(!cancelOMPloop)
+        {
+            double rho = sigma; // According to TA. Here???
 
-	for (int iteration = 0; iteration < maxIterations; iteration++) {
+            apply(A, s, z); // z = applyA(s);
 
-		double rho = sigma; // According to TA. Here???
+            double alpha = rho / dotProduct(z, s);
 
-		apply(A, s, z); // z = applyA(s);
+            GridData alphaTimesS;
+            alphaTimesS.initialize();
+            multiply(alpha, s, alphaTimesS);
+            add(p, alphaTimesS, p);
+            //p += alpha * s;
 
-		double alpha = rho/dotProduct(z, s);
+            GridData alphaTimesZ;
+            alphaTimesZ.initialize();
+            multiply(alpha, z, alphaTimesZ);
+            subtract(r, alphaTimesZ, r);
+            //r -= alpha * z;
+            if (maxMagnitude(r) <= tolerance)
+            {
+                PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
+                cancelOMPloop = true; //return p;
 
-		GridData alphaTimesS; alphaTimesS.initialize();
-		multiply(alpha, s, alphaTimesS);
-		add(p, alphaTimesS, p);
-		//p += alpha * s;
-
-		GridData alphaTimesZ; alphaTimesZ.initialize();
-		multiply(alpha, z, alphaTimesZ);
-		subtract(r, alphaTimesZ, r);
-		//r -= alpha * z;
-		if (maxMagnitude(r) <= tolerance) {
-			//PRINT_LINE("PCG converged in " << (iteration + 1) << " iterations.");
-			return true; //return p;
-		}
+            }
 
 //		applyPreconditioner(r, A, z); // z = applyPreconditioner(r);
 
-		double sigmaNew = dotProduct(z, r);
+            double sigmaNew = dotProduct(z, r);
 
-		double beta = sigmaNew / rho;
+            double beta = sigmaNew / rho;
 
-		GridData betaTimesS; betaTimesS.initialize();
-		multiply(beta, s, betaTimesS);
-		add(z, betaTimesS, s);
-		//s = z + beta * s;
+            GridData betaTimesS;
+            betaTimesS.initialize();
+            multiply(beta, s, betaTimesS);
+            add(z, betaTimesS, s);
+            //s = z + beta * s;
 
-		sigma = sigmaNew;
-	}
+            sigma = sigmaNew;
+        }
+    }
 
+    return cancelOMPloop;
+    if(!cancelOMPloop)
 	PRINT_LINE( "PCG didn't converge!" );
-	return false;
 
 }
 
@@ -837,6 +898,9 @@ bool MACGrid::preconditionedConjugateGradient(const GridDataMatrix & A, GridData
 void MACGrid::calculatePreconditioner(const GridDataMatrix & A) {
     double tau=0.97;
 	precon.initialize();
+# ifdef OMParallelize
+# pragma omp parallel for
+# endif
     FOR_EACH_CELL
             {
                 double Aii = (i==0)?0:AMatrix.plusI(i-1,j,k);

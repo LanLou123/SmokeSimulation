@@ -7,6 +7,7 @@
 #include "open_gl_headers.h" 
 #include "basic_math.h"
 #include <string.h>
+#include <omp.h>
 
 // Geometry and whatnot
 SmokeSim theSmokeSim;
@@ -207,6 +208,9 @@ void init(void)
 
 int main(int argc, char **argv)
 {
+# ifdef OMParallelize
+    omp_set_num_threads(TOTALThreads);
+# endif
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowSize(640, 480);
