@@ -150,7 +150,7 @@ void MACGrid::updateSources()
         for(int j=0; j<3; j++){
             for(int k=1;k<4;k++)
             {
-                mV(i, j, k) = 22.0;
+                mV(i, j, k) = 12.0;
                 mU(i, j, k) = 0.0;
                 mD(i, j, k) = 1.0;
                 mT(i, j, k) = 1.0;
@@ -404,16 +404,12 @@ void MACGrid::computeDivergence()
 # endif
     FOR_EACH_CELL {
 
-
-// Construct the vector of divergences d:
                 double velLowX = mU(i, j, k);
                 double velHighX = mU(i + 1, j, k);
                 double velLowY = mV(i, j, k);
                 double velHighY = mV(i, j + 1, k);
                 double velLowZ = mW(i, j, k);
                 double velHighZ = mW(i, j, k + 1);
-
-                // Use 0 for solid boundary velocities:
                 if (i == 0) {
                     velLowX = 0.0;
                 }
@@ -425,16 +421,15 @@ void MACGrid::computeDivergence()
                 {
                     velLowZ = 0.0;
                 }
-
-                if (i + 1 == theDim[MACGrid::X])
+                if (i == theDim[MACGrid::X] - 1)
                 {
                     velHighX = 0.0;
                 }
-                if (j + 1 == theDim[MACGrid::Y])
+                if (j == theDim[MACGrid::Y] - 1)
                 {
                     velHighY = 0.0;
                 }
-                if (k + 1 == theDim[MACGrid::Z])
+                if (k == theDim[MACGrid::Z] - 1)
                 {
                     velHighZ = 0.0;
                 }
@@ -455,22 +450,18 @@ void MACGrid::checkPressure( int& i, int& j, int& k, const GridData& p, vec3& mi
         {
             minPressurebound[0] = p(i-1,j,k);
         }
-
         if (i < theDim[MACGrid::X])
         {
             maxPressurebound[0] = p(i,j,k);
         }
-
         if (i-1 < 0)
         {
             minPressurebound[0] = maxPressurebound[0] - theBoundConstant * (mU(i,j,k) - 0);
         }
-
         if (i >= theDim[MACGrid::X])
         {
             maxPressurebound[0] = minPressurebound[0] + theBoundConstant * (mU(i,j,k) - 0);
         }
-
     }
     if (isValidFace(MACGrid::Y, i, j, k))
     {
@@ -478,17 +469,14 @@ void MACGrid::checkPressure( int& i, int& j, int& k, const GridData& p, vec3& mi
         {
             minPressurebound[1] = p(i,j-1,k);
         }
-
         if (j < theDim[MACGrid::Y])
         {
             maxPressurebound[1] = p(i,j,k);
         }
-
         if (j-1 < 0)
         {
             minPressurebound[1] = maxPressurebound[1] - theBoundConstant * (mV(i,j,k) - 0);
         }
-
         if (j >= theDim[MACGrid::Y])
         {
             maxPressurebound[1] = minPressurebound[1] + theBoundConstant * (mV(i,j,k) - 0);
@@ -529,11 +517,9 @@ void MACGrid::project(double dt)
     A.setZero();
     VectorXd b(size);
     double pho =1;
-    const double constant = (pho * (theCellSize * theCellSize))/dt; // Why square not cube
+    const double constant = (pho * (theCellSize * theCellSize))/dt;
 
     GridData p;
-    GridData d;
-    d.initialize();
     p.initialize();
     // Construct d
     diverGence.initialize();
