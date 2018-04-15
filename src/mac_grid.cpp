@@ -140,11 +140,6 @@ void MACGrid::initialize()
 
 void MACGrid::updateSources()
 {
-    // Set initial values for density, temperature, velocity
-
-
-
-
 
     for(int i=12; i<15;i++){
         for(int j=0; j<3; j++){
@@ -157,7 +152,6 @@ void MACGrid::updateSources()
             }
         }
     }
-
 
 	// Refresh particles in source.
 	for(int i=13; i<14; i++) {
@@ -524,11 +518,9 @@ void MACGrid::project(double dt)
     A.setZero();
     VectorXd b(size);
     double pho =1;
-    const double constant = (pho * (theCellSize * theCellSize))/dt; // Why square not cube
+    const double constant = (pho * (theCellSize * theCellSize))/dt; 
 
     GridData p;
-    GridData d;
-    d.initialize();
     p.initialize();
     // Construct d
     diverGence.initialize();
@@ -636,14 +628,7 @@ mP=target.mP;
 		}
 	}
 	#endif
-
-
-   // Then save the result to our object
-
-
 	#ifdef _DEBUG
-   // IMPLEMENT THIS AS A SANITY CHECK: assert (checkDivergence());
-   // TODO: Fix duplicate code:
    FOR_EACH_CELL {
 	   // Construct the vector of divergences d:
         double velLowX = mU(i,j,k);
