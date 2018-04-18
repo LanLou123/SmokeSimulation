@@ -141,12 +141,13 @@ void MACGrid::initialize()
 void MACGrid::updateSources()
 {
 
-    for(int i=12; i<15;i++){
-        for(int j=0; j<3; j++){
-            for(int k=1;k<4;k++)
+    for(int i=9; i<11;i++){
+        for(int j=0; j<2; j++){
+            for(int k=9;k<11;k++)
             {
-                mV(i, j, k) = 12.0;
-                mU(i, j, k) = 0.0;
+                mV(i, j, k) = 20.0;
+                mU(i,j,k)=20.0;
+                mW(i,j,k)=20.0;
                 mD(i, j, k) = 1.0;
                 mT(i, j, k) = 1.0;
             }
@@ -154,9 +155,9 @@ void MACGrid::updateSources()
     }
 
 	// Refresh particles in source.
-	for(int i=13; i<14; i++) {
-		for (int j = 0; j < 3; j++) {
-			for (int k = 3; k <= 3; k++) {
+	for(int i=9; i<11; i++) {
+		for (int j = 0; j < 2; j++) {
+			for (int k = 9; k <= 10; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
                     double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
@@ -222,11 +223,11 @@ void MACGrid::advectTemperature(double dt)
 # endif
     FOR_EACH_CELL
             {
-                vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
+                vec3 currentptc=vec3((i+0.5)*theCellSize,(j+0.5)*theCellSize,(k+0.5)*theCellSize);
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
-                double new_temp=getTemperature(old_pt);
+                double new_temp=mT.interpolate(old_pt);
                 target.mT(i,j,k)=new_temp;
             };
     mT =target.mT;
@@ -260,12 +261,11 @@ void MACGrid::advectDensity(double dt)
 # endif
     FOR_EACH_CELL
             {
-                vec3 currentptc=vec3(i*theCellSize+0.5,j*theCellSize+0.5,k*theCellSize+0.5);
-                double cur_density=getDensity(currentptc);
+                vec3 currentptc=vec3((i+0.5)*theCellSize,(j+0.5)*theCellSize,(k+0.5)*theCellSize);
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
-                double new_density=getDensity(old_pt);
+                double new_density=mD.interpolate(old_pt);
                 target.mD(i,j,k)=new_density;
             };
 
@@ -555,6 +555,7 @@ mP=target.mP;
             target.mW(i,j,k) = mW(i,j,k) - (dt / pho) * (maxPressurebound[2] - minPressurebound[2]) / theCellSize;
 
         };
+
     mU = target.mU;
     mV = target.mV;
     mW = target.mW;
@@ -1153,15 +1154,15 @@ void MACGrid::drawVelocities()
 vec4 MACGrid::getRenderColor(int i, int j, int k)
 {
 	
-	double value = mD(i, j, k); 
+	double value = mD(i, j, k);
 	vec4 coldColor(0.5, 0.5, 1.0, value);
 	vec4 hotColor(1.0, 0.5, 0.5, value);
     return LERP(coldColor, hotColor, mT(i, j, k));
-	
+
 
 	/*
 	// OLD:
-    double value = mD(i, j, k); 
+    double value = mD(i, j, k);
     return vec4(1.0, 0.9, 1.0, value);
 	*/
 }
@@ -1173,11 +1174,11 @@ vec4 MACGrid::getRenderColor(const vec3& pt)
 	vec4 hotColor(1.0, 0.5, 0.5, value);
     return LERP(coldColor, hotColor, getTemperature(pt));
 
-	/*
-	// OLD:
-    double value = getDensity(pt); 
-    return vec4(1.0, 1.0, 1.0, value);
-	*/
+
+//	// OLD:
+//    double value = getDensity(pt);
+//    return vec4(1.0, 1.0, 1.0, value);
+
 }
 
 void MACGrid::drawZSheets(bool backToFront)
