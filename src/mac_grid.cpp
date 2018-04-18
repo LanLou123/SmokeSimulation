@@ -141,13 +141,13 @@ void MACGrid::initialize()
 void MACGrid::updateSources()
 {
 
-    for(int i=9; i<11;i++){
-        for(int j=0; j<2; j++){
-            for(int k=9;k<11;k++)
+    for(int i=9; i<13;i++){
+        for(int j=0; j<3; j++){
+            for(int k=9;k<13;k++)
             {
-                mV(i, j, k) = 20.0;
-                mU(i,j,k)=20.0;
-                mW(i,j,k)=20.0;
+                mV(i, j, k) = 80.0;
+                mU(i,j,k)=80.0;
+                mW(i,j,k)=80.0;
                 mD(i, j, k) = 1.0;
                 mT(i, j, k) = 1.0;
             }
@@ -155,9 +155,9 @@ void MACGrid::updateSources()
     }
 
 	// Refresh particles in source.
-	for(int i=9; i<11; i++) {
-		for (int j = 0; j < 2; j++) {
-			for (int k = 9; k <= 10; k++) {
+	for(int i=9; i<13; i++) {
+		for (int j = 0; j < 3; j++) {
+			for (int k = 9; k <= 12; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
 				for(int p=0; p<10; p++) {
                     double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
