@@ -12,4 +12,4 @@ unrendered smoke:
 
 two smoke:
 
-![Alt Text](![Alt Text](https://media.giphy.com/media/65AXrppLIHxzeOaZ0B/giphy.gif)
+![Alt Text](https://media.giphy.com/media/7vARMobfm84XkBxICt/giphy.gif)
