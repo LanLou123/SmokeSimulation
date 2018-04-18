@@ -106,26 +106,26 @@ void MACGrid::reset()
    mW.initialize();
    mP.initialize();
    mD.initialize();
-   mT.initialize(0.0);
+   mT.initialize();
 
-    centeral_vel_x.initialize(0.0);
-    centeral_vel_y.initialize(0.0);
-    centeral_vel_z.initialize(0.0);
+    centeral_vel_x.initialize();
+    centeral_vel_y.initialize();
+    centeral_vel_z.initialize();
 
-    omegaX.initialize(0.0);
-    omegaY.initialize(0.0);
-    omegaZ.initialize(0.0);
-    omegaN.initialize(0.0);
+    omegaX.initialize();
+    omegaY.initialize();
+    omegaZ.initialize();
+    omegaN.initialize();
 
-    omegaGX.initialize(0.0);
-    omegaGY.initialize(0.0);
-    omegaGZ.initialize(0.0);
+    omegaGX.initialize();
+    omegaGY.initialize();
+    omegaGZ.initialize();
 
-    vorConfFX.initialize(0.0);
-    vorConfFY.initialize(0.0);
-    vorConfFZ.initialize(0.0);
+    vorConfFX.initialize();
+    vorConfFY.initialize();
+    vorConfFZ.initialize();
 
-    diverGence.initialize(0.0);
+    diverGence.initialize();
 
     calculateAMatrix();
     calculatePreconditioner(AMatrix);
@@ -141,13 +141,13 @@ void MACGrid::initialize()
 void MACGrid::updateSources()
 {
 
-    for(int i=9; i<13;i++){
+    for(int i=9; i<12;i++){
         for(int j=0; j<3; j++){
-            for(int k=9;k<13;k++)
+            for(int k=9;k<12;k++)
             {
-                mV(i, j, k) = 80.0;
-                mU(i,j,k)=80.0;
-                mW(i,j,k)=80.0;
+                mV(i, j, k) = 60.0;
+                mU(i,j,k)=60.0;
+                mW(i,j,k)=60.0;
                 mD(i, j, k) = 1.0;
                 mT(i, j, k) = 1.0;
             }
@@ -155,7 +155,7 @@ void MACGrid::updateSources()
     }
 
 	// Refresh particles in source.
-	for(int i=9; i<13; i++) {
+	for(int i=9; i<12; i++) {
 		for (int j = 0; j < 3; j++) {
 			for (int k = 9; k <= 12; k++) {
 				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
@@ -227,7 +227,7 @@ void MACGrid::advectTemperature(double dt)
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
-                double new_temp=mT.interpolate(old_pt);
+                double new_temp=getTemperature(old_pt);
                 target.mT(i,j,k)=new_temp;
             };
     mT =target.mT;
@@ -265,7 +265,7 @@ void MACGrid::advectDensity(double dt)
                 vec3 cur_vel=getVelocity(currentptc);
                 vec3 mid_pt=currentptc-cur_vel*dt/2;
                 vec3 old_pt=currentptc-getVelocity(mid_pt);
-                double new_density=mD.interpolate(old_pt);
+                double new_density=getDensity(old_pt);
                 target.mD(i,j,k)=new_density;
             };
 
@@ -282,7 +282,7 @@ void MACGrid::computeBouyancy(double dt)
             {
                 double s = (mD(i,j,k) + mD(i,j-1,k))/2;
                 double T = (mT(i,j,k)+mT(i,j-1,k))/2;
-                double fbuoy = -theBuoyancyAlpha*s+theBuoyancyBeta*T;
+                double fbuoy = -theBuoyancyAlpha*s+theBuoyancyBeta*(T-theBuoyancyAmbientTemperature);
                 target.mV(i,j,k) += dt*fbuoy;
             };
 
@@ -355,7 +355,7 @@ void MACGrid::computeVorticityConfinement(double dt) {
 # endif
     FOR_EACH_FACE_X
             {
-                target.mU(i, j, k) += dt * (vorConfFX(i - 1, j, k) + vorConfFX(i, j, k)) / 2;
+                target.mU(i, j, k) += dt * (vorConfFX(i - 1, j, k) + vorConfFX(i, j, k)) / fluidDensity *2;
             };
 # ifdef OMParallelize
 # pragma omp parallel for
@@ -363,7 +363,7 @@ void MACGrid::computeVorticityConfinement(double dt) {
     FOR_EACH_FACE_Y
             {
 
-                target.mV(i, j, k) += dt * (vorConfFY(i, j - 1, k) + vorConfFY(i, j, k)) / 2;
+                target.mV(i, j, k) += dt * (vorConfFY(i, j - 1, k) + vorConfFY(i, j, k)) / fluidDensity* 2;
 
             };
 # ifdef OMParallelize
@@ -371,7 +371,7 @@ void MACGrid::computeVorticityConfinement(double dt) {
 # endif
     FOR_EACH_FACE_Z
             {
-                target.mW(i, j, k) += dt * (vorConfFZ(i, j, k - 1) + vorConfFZ(i, j, k)) / 2;
+                target.mW(i, j, k) += dt * (vorConfFZ(i, j, k - 1) + vorConfFZ(i, j, k)) /fluidDensity* 2;
             };
 
     // Then save the result to our object
@@ -505,8 +505,8 @@ void MACGrid::project(double dt)
     SparseMatrix<double> A(size,size);
     A.setZero();
     VectorXd b(size);
-    double pho =1;
-    const double constant = (pho * (theCellSize * theCellSize))/dt;
+    double pho =4;
+    const double constant = (theAirDensity * (theCellSize * theCellSize))/dt;
     GridData p;
     p.initialize();
     // Construct d
@@ -532,7 +532,7 @@ mP=target.mP;
             vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
             vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
             checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
-            target.mU(i,j,k) = mU(i,j,k) - (dt / pho) * (maxPressurebound[0] - minPressurebound[0]) / theCellSize;
+            target.mU(i,j,k) = mU(i,j,k) - (dt / theAirDensity) * (maxPressurebound[0] - minPressurebound[0]) / theCellSize;
         };
 # ifdef OMParallelize
 # pragma omp parallel for
@@ -542,7 +542,7 @@ mP=target.mP;
                 vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
                 vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
                 checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
-                target.mV(i,j,k) = mV(i,j,k) - (dt / pho) * (maxPressurebound[1] - minPressurebound[1]) / theCellSize;
+                target.mV(i,j,k) = mV(i,j,k) - (dt / theAirDensity) * (maxPressurebound[1] - minPressurebound[1]) / theCellSize;
             };
 # ifdef OMParallelize
 # pragma omp parallel for
@@ -552,7 +552,7 @@ mP=target.mP;
             vec3 minPressurebound  = vec3(0.0, 0.0, 0.0);
             vec3 maxPressurebound = vec3(0.0, 0.0, 0.0);
             checkPressure( i, j, k, p, minPressurebound, maxPressurebound );
-            target.mW(i,j,k) = mW(i,j,k) - (dt / pho) * (maxPressurebound[2] - minPressurebound[2]) / theCellSize;
+            target.mW(i,j,k) = mW(i,j,k) - (dt / theAirDensity) * (maxPressurebound[2] - minPressurebound[2]) / theCellSize;
 
         };
 

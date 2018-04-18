@@ -14,6 +14,7 @@
 extern const int theMillisecondsPerFrame;
 extern const int theDim[3];
 extern const double theCellSize;
+extern const double fluidDensity;
 extern const double theAirDensity;
 extern const double theBuoyancyAlpha;
 extern const double theBuoyancyBeta;	
