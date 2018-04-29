@@ -11,8 +11,16 @@
 
 unrendered smoke:
 
-![Alt Text](https://media.giphy.com/media/65AXrppLIHxzeOaZ0B/giphy.gif)
+![Alt Text](https://media.giphy.com/media/65AXrppLIHxzeOaZ0B/giphy.gif)   
+
+mini nuke:
+
+![mini nuke](https://thumbs.gfycat.com/HugeEcstaticHousefly-size_restricted.gif)
 
 two smoke:
 
-![Alt Text](https://media.giphy.com/media/7vARMobfm84XkBxICt/giphy.gif)
+![Alt Text](https://media.giphy.com/media/7vARMobfm84XkBxICt/giphy.gif) 
+
+smoke sphere
+
+![](https://thumbs.gfycat.com/ImmaculateHeartyKinkajou-size_restricted.gif)
