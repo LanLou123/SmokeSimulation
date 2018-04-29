@@ -1,6 +1,5 @@
 # smoke simulation using semi-lagrangian advection # 
 
-![example render](/image/nn.JPG)
 
 - added vel advection with semi-lagrangian and second order runge kutta
 - added T D advection using semi-lagrangian
