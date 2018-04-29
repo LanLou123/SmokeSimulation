@@ -46,6 +46,7 @@ protected:
     void computeOmega();
     void computeOmegaGradient();
     void computeDivergence();
+    void computeBound();
 	// Rendering
 	struct Cube { vec3 pos; vec4 color; double dist; };
 	void drawWireGrid();
@@ -119,7 +120,7 @@ protected:
 
 	GridDataMatrix AMatrix;
 	GridData precon;
-
+    vec3 sphereCentr;
 
 public:
 

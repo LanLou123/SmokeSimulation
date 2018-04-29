@@ -141,37 +141,119 @@ void MACGrid::initialize()
 void MACGrid::updateSources()
 {
 
-    for(int i=9; i<12;i++){
-        for(int j=0; j<3; j++){
-            for(int k=9;k<12;k++)
+//    for(int j=0;j<5;j++)
+//    {
+//
+//    }
+    //case1
+//    for(int i=0; i<5;i++){
+//        for(int j=0; j<5; j++){
+//            for(int k=0;k<5;k++)
+//            {
+//                mV(i, j, k) = 40.0;
+//                mU(i,j,k)=40.0;
+//                mW(i,j,k)=40.0;
+//                mD(i, j, k) = 1.0;
+//                mT(i, j, k) = 1.0;
+//            }
+//        }
+//    }
+    //case2
+//    for(int i=30; i>25;i--){
+//        for(int j=29; j>25; j--){
+//            for(int k=30;k>25;k--)
+//            {
+//                mV(i, j, k) = -40.0;
+//                mU(i,j,k)=-40.0;
+//                mW(i,j,k)=-40.0;
+//                mD(i, j, k) = 1.0;
+//                mT(i, j, k) = 1.0;
+//            }
+//        }
+//    }
+   //case4
+    FOR_EACH_FACE_Y
             {
-                mV(i, j, k) = 60.0;
-                mU(i,j,k)=60.0;
-                mW(i,j,k)=60.0;
-                mD(i, j, k) = 1.0;
-                mT(i, j, k) = 1.0;
-            }
-        }
-    }
-
-	// Refresh particles in source.
-	for(int i=9; i<12; i++) {
-		for (int j = 0; j < 3; j++) {
-			for (int k = 9; k <= 12; k++) {
-				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
-				for(int p=0; p<10; p++) {
-                    double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
-                    double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
-                    double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
-                    vec3 shift(a, b, c);
-                    vec3 xp = cell_center + shift;
-                    rendering_particles.push_back(xp);
+                if((pow((i-20),2)+pow((k-20),2)<=3)&&j==1)
+                {
+                    mV(i, j, k) = 8.0;
+                    mD(i, j, k) = 1.0;
+                    mT(i, j, k) = 3.0;
                 }
-			}
-		}
-	}
-	
-
+            };
+    //case3
+//    for(int i=18; i<23;i++){
+//        for(int j=1; j<2; j++){
+//            for(int k=18;k<23;k++)
+//            {
+//                mV(i, j, k) = 8.0;
+//                mD(i, j, k) = 1.0;
+//                mT(i, j, k) = 3.0;
+//            }
+//        }
+//    }
+	////case1
+//	for(int i=0; i<5; i++) {
+//		for (int j = 0; j < 5; j++) {
+//			for (int k = 0; k < 5; k++) {
+//				vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
+//				for(int p=0; p<10; p++) {
+//                    double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    vec3 shift(a, b, c);
+//                    vec3 xp = cell_center + shift;
+//                    rendering_particles.push_back(xp);
+//                }
+//			}
+//		}
+//	}
+    //case2
+//    for(int i=30; i>25; i--) {
+//        for (int j =29; j >25 ; j--) {
+//            for (int k = 30; k > 25; k--) {
+//                vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
+//                for(int p=0; p<10; p++) {
+//                    double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    vec3 shift(a, b, c);
+//                    vec3 xp = cell_center + shift;
+//                    rendering_particles.push_back(xp);
+//                }
+//            }
+//        }
+//    }
+    //case3
+//    for(int i=18; i<23; i++) {
+//        for (int j = 1; j < 2; j++) {
+//            for (int k = 18; k < 23; k++) {
+//                vec3 cell_center(theCellSize*(i+0.5), theCellSize*(j+0.5), theCellSize*(k+0.5));
+//                for(int p=0; p<10; p++) {
+//                    double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+//                    vec3 shift(a, b, c);
+//                    vec3 xp = cell_center + shift;
+//                    rendering_particles.push_back(xp);
+//                }
+//            }
+//        }
+//    }
+    //case4
+    FOR_EACH_FACE_Y {
+                if ((pow((i - 20), 2) + pow((k - 20), 2) <= 2) && j == 1) {
+                    vec3 cell_center(theCellSize * (i + 0.5), theCellSize * (j + 0.5), theCellSize * (k + 0.5));
+                    for (int p = 0; p < 30; p++) {
+                        double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+                        double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+                        double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
+                        vec3 shift(a, b, c);
+                        vec3 xp = cell_center + shift;
+                        rendering_particles.push_back(xp);
+                    }
+                }
+            }
 }
 
 
@@ -248,6 +330,20 @@ void MACGrid::advectRenderingParticles(double dt) {
         vec3 averageVelocity = (currentVelocity + nextVelocity) / 2.0;
         vec3 betterNextPosition = currentPosition + averageVelocity * dt;
         vec3 clippedBetterNextPosition = clipToGrid(betterNextPosition, currentPosition);
+        //====================
+        vec3 vel;
+        vec3 centr(21.0,8.0,21.0);
+        double r=2*theCellSize;
+        centr*=theCellSize;
+        double radius=Distance(centr,clippedBetterNextPosition);
+        if(radius<r)
+        {
+
+            vec3 pos2c=clippedBetterNextPosition-centr;
+            pos2c=r*pos2c/radius;
+            clippedBetterNextPosition=pos2c+centr;
+        }
+        //=====================
         rendering_particles[p] = clippedBetterNextPosition;
 		rendering_particles_vel[p] = averageVelocity;
 	}
@@ -283,7 +379,7 @@ void MACGrid::computeBouyancy(double dt)
                 double s = (mD(i,j,k) + mD(i,j-1,k))/2;
                 double T = (mT(i,j,k)+mT(i,j-1,k))/2;
                 double fbuoy = -theBuoyancyAlpha*s+theBuoyancyBeta*(T-theBuoyancyAmbientTemperature);
-                target.mV(i,j,k) += dt*fbuoy;
+                target.mV(i,j,k) += dt*fbuoy*10;
             };
 
     mV = target.mV;
@@ -494,6 +590,25 @@ void MACGrid::checkPressure( int& i, int& j, int& k, const GridData& p, vec3& mi
         }
     }
 }
+void MACGrid::computeBound()
+{
+
+    FOR_EACH_FACE_X
+            {
+
+            };
+    FOR_EACH_FACE_Y
+            {
+//                if(j==15&&(i<=24)&&(i>=18)&&(k<=24)&&(k>=18))
+//                {
+//                    target.mV(i,j,k)=0;
+//                }
+            };
+    FOR_EACH_FACE_Z
+            {
+
+            };
+}
 
 void MACGrid::project(double dt)
 {
@@ -556,6 +671,7 @@ mP=target.mP;
 
         };
 
+    computeBound();
     mU = target.mU;
     mV = target.mV;
     mW = target.mW;
@@ -640,15 +756,30 @@ mP=target.mP;
 vec3 MACGrid::getVelocity(const vec3& pt)
 {
    vec3 vel;
-   vel[0] = getVelocityX(pt); 
-   vel[1] = getVelocityY(pt); 
-   vel[2] = getVelocityZ(pt); 
-   return vel;
+    vec3 centr(21.0,8.0,21.0);
+    centr*=theCellSize;
+    double radius=Distance(centr,pt);
+    if(radius>2*theCellSize)
+    {
+        vel[0] = getVelocityX(pt);
+        vel[1] = getVelocityY(pt);
+        vel[2] = getVelocityZ(pt);
+        return vel;
+    }
+    else if(radius==2*theCellSize)
+    {
+        vec3 curvel(mU.interpolate(pt),mV.interpolate(pt),mW.interpolate(pt));
+        vec3 pro=Dot(curvel,(pt-centr))*(pt-centr).Normalize();
+        return (curvel-pro);
+    }
+
 }
 
 double MACGrid::getVelocityX(const vec3& pt)
 {
+
    return mU.interpolate(pt);
+
 }
 
 double MACGrid::getVelocityY(const vec3& pt)

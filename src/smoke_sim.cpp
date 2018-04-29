@@ -43,7 +43,7 @@ void SmokeSim::step()
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
-	double dt = 0.004;//0.1;
+	double dt = 0.008;//0.1;
 
    // Step0: Gather user forces
    mGrid.updateSources();
