@@ -22,4 +22,4 @@ two smoke:
 
 smoke sphere
 
-![](https://thumbs.gfycat.com/ImmaculateHeartyKinkajou-size_restricted.gif)
+![](https://github.com/LanLou123/SmokeSim/tree/master/image/smokesphere.gif)
