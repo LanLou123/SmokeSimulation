@@ -24,7 +24,9 @@
 using namespace Eigen;
 using namespace std;
 
-
+#define  enableSphere false
+#define  propogateCentr 24
+#define  particleDensity 50
 // Globals
 MACGrid target;
 
@@ -172,15 +174,62 @@ void MACGrid::updateSources()
 //        }
 //    }
    //case4
-    FOR_EACH_FACE_Y
+    int Vx1=2;
+    int r=16;
+//    FOR_EACH_FACE_X
+//            {
+//                bool spiral = false;
+//                if((pow((j-propogateCentr+12),2)+pow((k-propogateCentr),2)<=r)&&i==2)
+//                {
+//                    float rat=vec3(i-propogateCentr,0,k-propogateCentr).Length()/sqrt(r);
+//                    vec3 horiDir=vec3(i-propogateCentr,0,k-propogateCentr)^vec3(0,1,0);
+//                    horiDir.Normalize();
+//                    if((horiDir[0]||horiDir[1]||horiDir[2])&&spiral) {
+//                        mU(i, j, k) = 8 * rat*horiDir[0] / horiDir.Length();
+//                        mW(i, j, k) = 8 * rat*horiDir[2] / horiDir.Length();
+//                    }
+//                    else
+//                    {
+//
+//                    }
+//                    mU(i, j, k) = Vx1 ;
+//                    mD(i, j, k) = 1.0;
+//                    mT(i, j, k) = 1.0;
+//                }
+//            };
+    FOR_EACH_FACE_X
             {
-                if((pow((i-20),2)+pow((k-20),2)<=3)&&j==1)
+                bool spiral = false;
+                if((pow((j-propogateCentr+15),2)+pow((k-propogateCentr),2)<=r)&&i==49)
                 {
-                    mV(i, j, k) = 8.0;
+                    float rat=vec3(i-propogateCentr,0,k-propogateCentr).Length()/sqrt(r);
+                    vec3 horiDir=vec3(i-propogateCentr,0,k-propogateCentr)^vec3(0,1,0);
+                    horiDir.Normalize();
+                    if((horiDir[0]||horiDir[1]||horiDir[2])&&spiral) {
+                        mU(i, j, k) = 8 * rat*horiDir[0] / horiDir.Length();
+                        mW(i, j, k) = 8 * rat*horiDir[2] / horiDir.Length();
+                    }
+                    else
+                    {
+
+                    }
+                    mU(i, j, k) = -Vx1;
                     mD(i, j, k) = 1.0;
-                    mT(i, j, k) = 3.0;
+                    mT(i, j, k) = 1.0;
                 }
             };
+//    FOR_EACH_FACE_X
+//            {
+//                if((pow((i-20),2)+pow((k-20),2)<=3)&&j==1)
+//                {
+//                    vec3 horiDir=vec3(i-20,0,k-20)^vec3(0,1,0);
+//                    horiDir.Normalize();
+//                    mU(i,j,k)=4*horiDir[0]/horiDir.Length();
+//                    mD(i, j, k) = 1.0;
+//                    mT(i, j, k) = 3.0;
+//                }
+//            };
+
     //case3
 //    for(int i=18; i<23;i++){
 //        for(int j=1; j<2; j++){
@@ -241,10 +290,10 @@ void MACGrid::updateSources()
 //        }
 //    }
     //case4
-    FOR_EACH_FACE_Y {
-                if ((pow((i - 20), 2) + pow((k - 20), 2) <= 2) && j == 1) {
+    FOR_EACH_FACE_X {
+                if ((pow((j - propogateCentr+15), 2) + pow((k - propogateCentr), 2) <= r) && i == 49) {
                     vec3 cell_center(theCellSize * (i + 0.5), theCellSize * (j + 0.5), theCellSize * (k + 0.5));
-                    for (int p = 0; p < 30; p++) {
+                    for (int p = 0; p < particleDensity; p++) {
                         double a = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
                         double b = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
                         double c = ((float) rand() / RAND_MAX - 0.5) * theCellSize;
@@ -331,17 +380,19 @@ void MACGrid::advectRenderingParticles(double dt) {
         vec3 betterNextPosition = currentPosition + averageVelocity * dt;
         vec3 clippedBetterNextPosition = clipToGrid(betterNextPosition, currentPosition);
         //====================
-        vec3 vel;
-        vec3 centr(21.0,8.0,21.0);
-        double r=2*theCellSize;
-        centr*=theCellSize;
-        double radius=Distance(centr,clippedBetterNextPosition);
-        if(radius<r)
+        if(enableSphere)
         {
+            vec3 vel;
+            vec3 centr(sphereC[0]+1.0,sphereC[1],sphereC[2]+1.0);
+            double r = 3 * theCellSize;
+            centr *= theCellSize;
+            double radius = Distance(centr, clippedBetterNextPosition);
+            if (radius < r) {
 
-            vec3 pos2c=clippedBetterNextPosition-centr;
-            pos2c=r*pos2c/radius;
-            clippedBetterNextPosition=pos2c+centr;
+                vec3 pos2c = clippedBetterNextPosition - centr;
+                pos2c = r * pos2c / radius;
+                clippedBetterNextPosition = pos2c + centr;
+            }
         }
         //=====================
         rendering_particles[p] = clippedBetterNextPosition;
@@ -379,7 +430,8 @@ void MACGrid::computeBouyancy(double dt)
                 double s = (mD(i,j,k) + mD(i,j-1,k))/2;
                 double T = (mT(i,j,k)+mT(i,j-1,k))/2;
                 double fbuoy = -theBuoyancyAlpha*s+theBuoyancyBeta*(T-theBuoyancyAmbientTemperature);
-                target.mV(i,j,k) += dt*fbuoy*10;
+                cout<<fbuoy<<endl;
+                target.mV(i,j,k) += dt*fbuoy;
             };
 
     mV = target.mV;
@@ -484,6 +536,7 @@ void MACGrid::addExternalForces(double dt)
 
 void MACGrid::computeDivergence()
 {
+
 # ifdef OMParallelize
 # pragma omp parallel for
 # endif
@@ -519,6 +572,7 @@ void MACGrid::computeDivergence()
                     velHighZ = 0.0;
                 }
                 diverGence(i,j,k)=-((velHighX - velLowX) + (velHighY - velLowY) + (velHighZ - velLowZ)) / theCellSize;
+
             }
 
 
@@ -756,21 +810,29 @@ mP=target.mP;
 vec3 MACGrid::getVelocity(const vec3& pt)
 {
    vec3 vel;
-    vec3 centr(21.0,8.0,21.0);
+    int r=3;
+    vec3 centr(sphereC[0]+1.0,sphereC[1],sphereC[2]+1.0);
     centr*=theCellSize;
     double radius=Distance(centr,pt);
-    if(radius>2*theCellSize)
+    if(!enableSphere)
     {
         vel[0] = getVelocityX(pt);
         vel[1] = getVelocityY(pt);
         vel[2] = getVelocityZ(pt);
         return vel;
     }
-    else if(radius==2*theCellSize)
+    else
     {
-        vec3 curvel(mU.interpolate(pt),mV.interpolate(pt),mW.interpolate(pt));
-        vec3 pro=Dot(curvel,(pt-centr))*(pt-centr).Normalize();
-        return (curvel-pro);
+        if (radius > 4 * theCellSize) {
+            vel[0] = getVelocityX(pt);
+            vel[1] = getVelocityY(pt);
+            vel[2] = getVelocityZ(pt);
+            return vel;
+        } else if (radius == 4 * theCellSize) {
+            vec3 curvel(mU.interpolate(pt), mV.interpolate(pt), mW.interpolate(pt));
+            vec3 pro = Dot(curvel, (pt - centr)) * (pt - centr).Normalize();
+            return (curvel - pro);
+        }
     }
 
 }

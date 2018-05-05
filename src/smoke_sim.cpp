@@ -43,9 +43,11 @@ void SmokeSim::step()
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
     std::cout<<"============================================================="<<mTotalFrameNum<<std::endl;
-	double dt = 0.008;//0.1;
-
+    std::cout<<mGrid.sphereC;
+	double dt = 0.085;//0.1;
+	mGrid.sphereC+=vec3(0,0,0.06);
    // Step0: Gather user forces
+    if(mTotalFrameNum<=130)
    mGrid.updateSources();
 
    // Step1: Calculate new velocities

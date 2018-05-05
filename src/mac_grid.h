@@ -123,7 +123,7 @@ protected:
     vec3 sphereCentr;
 
 public:
-
+    vec3 sphereC=vec3(20,8,15);
 	// rendering particles
 	std::vector<vec3> rendering_particles;
 	std::vector<vec3> rendering_particles_vel;
