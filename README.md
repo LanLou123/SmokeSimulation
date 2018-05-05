@@ -8,9 +8,9 @@
 - added projection
 - added preconditioned conjugategradient for pressure compute
 
-unrendered smoke:
+one smoke:
 
-![Alt Text](https://media.giphy.com/media/65AXrppLIHxzeOaZ0B/giphy.gif)   
+![](https://github.com/LanLou123/SmokeSim/raw/master/image/onesmoke.gif)   
 
 mini nuke:
 
