@@ -18,7 +18,7 @@ mini nuke:
 
 two smoke:
 
-![Alt Text](https://media.giphy.com/media/7vARMobfm84XkBxICt/giphy.gif) 
+![](https://github.com/LanLou123/SmokeSim/raw/master/image/twosmoke.gif) 
 
 smoke sphere
 
